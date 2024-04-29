@@ -15,7 +15,7 @@ export default function Login() {
   const [infoLogin, setInfoLogin] = useState<UserInfo[]>([]);
 
   useEffect(() => {
-    localStorage.setItem("api", "https://slug-ruling-noticeably.ngrok-free.app/api");
+    localStorage.setItem("api", "https://slug-ruling-noticeably.ngrok-free.app/api/");
 
     fetch(`${localStorage.getItem("api")}users`)
       .then((response) => {
