@@ -15,7 +15,7 @@ export default function Login() {
   const [infoLogin, setInfoLogin] = useState<UserInfo[]>([]);
 
   useEffect(() => {
-    localStorage.setItem("api", "https://slug-ruling-noticeably.ngrok-free.app/api/");
+    localStorage.setItem("api", "http://localhost:3001/api/");
 
     fetch(`${localStorage.getItem("api")}users`)
       .then((response) => {
@@ -51,9 +51,14 @@ export default function Login() {
     <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-lg">
         <a href="/">
-          <Image src="/isishare.png" width={150} height={0} alt="" />
+        <Image
+            className="w-full max-w-lg lg:mx-auto"
+            src="/isishare.png"
+            width={300}
+            height={300}
+            alt=""
+          />
         </a>
-
         <form
           onSubmit={handleSubmit}
           className="mb-0 mt-6 space-y-4 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8"
@@ -81,9 +86,9 @@ export default function Login() {
                   stroke="currentColor"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
                   />
                 </svg>
@@ -112,15 +117,15 @@ export default function Login() {
                   stroke="currentColor"
                 >
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                   <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
                     d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                   />
                 </svg>

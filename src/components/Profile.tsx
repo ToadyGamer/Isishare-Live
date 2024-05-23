@@ -16,80 +16,100 @@ export default function Profile() {
     information: string;
   }
 
-  //Inf
-  const [name, setName] = useState([]);
-  const [points, setPoints] = useState([]);
+  interface NotationsInfo {
+    user_id_receiver: string;
+    user_id_assessor: string;
+  }
 
+  const [name, setName] = useState<string>('');
+  const [points, setPoints] = useState<number>(0);
   const [contacts, setContacts] = useState<ContactInfo[]>([]);
   const [sources, setSources] = useState<SourceInfo[]>([]);
-
   const [ownUser, setOwnUser] = useState(false);
+  const [notations, setNotations] = useState<NotationsInfo[]>([]);
+  const [idActualUser, setIdActualUser] = useState("0");
+  const [idTargetUser, setIdTargetUser] = useState("0");
+  const [showDelete, setShowDelete] = useState(false);
+  const [idContact, setIdContact] = useState<string>("");
+  const [showAdd, setShowAdd] = useState(false);
+  const [source, setSource] = useState<string>("");
+  const [info, setInfo] = useState<string>("");
 
   useEffect(() => {
-    if (
-      localStorage.getItem("idActualUser") ==
-      localStorage.getItem("idTargetUser")
-    )
-      setOwnUser(true);
+    if (typeof window !== 'undefined') {
+      const actualUser = localStorage.getItem("idActualUser") || "0";
+      const targetUser = localStorage.getItem("idTargetUser") || "0";
+      setIdActualUser(actualUser);
+      setIdTargetUser(targetUser);
 
-    fetch(
-      `${localStorage.getItem("api")}contacts/user/${localStorage.getItem(
-        "idTargetUser"
-      )}`
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setContacts(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
+      if (actualUser === targetUser) {
+        setOwnUser(true);
+      }
 
-    fetch(
-      `${localStorage.getItem("api")}users/id/${localStorage.getItem(
-        "idTargetUser"
-      )}`
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setName(data[0].name);
-        setPoints(data[0].points);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
-    fetch(`${localStorage.getItem("api")}sources`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setSources(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching users:", error);
-      });
+      fetch(`${localStorage.getItem("api")}contacts/user/${targetUser}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setContacts(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching contacts:", error);
+        });
+
+      fetch(`${localStorage.getItem("api")}users/id/${targetUser}`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setName(data[0].name);
+          setPoints(data[0].points);
+        })
+        .catch((error) => {
+          console.error("Error fetching user data:", error);
+        });
+
+      fetch(`${localStorage.getItem("api")}sources`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setSources(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching sources:", error);
+        });
+
+      fetch(`${localStorage.getItem("api")}notations`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setNotations(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching notations:", error);
+        });
+    }
   }, []);
-  //#region DELETE
-  const [showDelete, setShowDelete] = React.useState(false);
-  const [idContact, setIdContact] = useState([]);
 
-  const deleteContactTrigger = (idContact: any) => {
+  const deleteContactTrigger = (idContact: string) => {
     setShowDelete(true);
     setIdContact(idContact);
   };
+
   const deleteContact = () => {
     fetch(`${localStorage.getItem("api")}contacts/delete/${idContact}`)
       .then((response) => {
@@ -99,19 +119,13 @@ export default function Profile() {
         return response.json();
       })
       .then((data) => {
+        setContacts(contacts.filter(contact => contact.id !== idContact));
         setShowDelete(false);
-        window.location.reload();
       })
       .catch((error) => {
-        console.error("Error fetching users:", error);
+        console.error("Error deleting contact:", error);
       });
   };
-  //#endregion
-
-  //#region ADD
-  const [showAdd, setShowAdd] = React.useState(false);
-  const [source, setSource] = useState<string>();
-  const [info, setInfo] = useState<string>();
 
   const handleSourceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSource(event.target.value);
@@ -123,11 +137,7 @@ export default function Profile() {
 
   const addContact = () => {
     fetch(
-      `${localStorage.getItem(
-        "api"
-      )}contacts/insert/user_id,information,source_id/"${localStorage.getItem(
-        "idTargetUser"
-      )}","${info}","${source}"`
+      `${localStorage.getItem("api")}contacts/insert/user_id,information,source_id/"${idTargetUser}","${info}","${source}"`
     )
       .then((response) => {
         if (!response.ok) {
@@ -136,34 +146,107 @@ export default function Profile() {
         return response.json();
       })
       .then((data) => {
+        setContacts([...contacts, { id: data.id, source_id: source, information: info }]);
         setShowAdd(false);
-        window.location.reload();
       })
       .catch((error) => {
-        console.error("Error fetching users:", error);
+        console.error("Error adding contact:", error);
       });
   };
-  //#endregion
+
+  const changeNote = (value: any) => {
+    const alreadyNote = notations.some(notation =>
+      notation.user_id_receiver === idTargetUser && notation.user_id_assessor === idActualUser
+    );
+
+    if (!alreadyNote) {
+      fetch(
+        `${localStorage.getItem("api")}users/update/${idTargetUser}/notation/${value}`
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(() => {
+          console.log("Notation modifiée !");
+        })
+        .catch((error) => {
+          console.error("Error updating notation:", error);
+        });
+
+      fetch(
+        `${localStorage.getItem("api")}notations/insert/user_id_receiver,user_id_assessor/"${idTargetUser}","${idActualUser}"`
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then(() => {
+          setNotations([...notations, { user_id_receiver: idTargetUser, user_id_assessor: idActualUser }]);
+        })
+        .catch((error) => {
+          console.error("Error inserting notation:", error);
+        });
+    } else {
+      alert("Vous avez déjà voté !");
+    }
+  }
 
   return (
     <div>
       <div className="ml-10 w-1/5 max-w-sm overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 float-right mr-10 mt-[88px]">
         <Image
-          className="object-cover object-center w-full h-56"
-          src=""
-          // https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80
+          className="object-cover object-center w-full"
+          src="/male-avatar.jpeg"
           width={300}
           height={300}
           alt="avatar"
-        />
-        <div className="flex items-center px-6 py-3 bg-dark-blue">
-          <h1 className="mx-3 text-lg font-semibold text-white">
-            NOM : {name}
-          </h1>
-          <br />
-          <h1 className="mx-3 text-lg font-semibold text-white">
-            POINTS : {points}
-          </h1>
+          />
+        <div className="items-center px-6 py-4 bg-dark-blue">
+          <div className="flex justify-center w-full">
+            <h1 className="mx-3 text-lg font-semibold text-white">
+              NOM : {name}
+            </h1>
+            <br />
+            <h1 className="mx-3 text-lg font-semibold text-white">
+              POINTS : {points}
+            </h1>
+          </div>
+          {idTargetUser != idActualUser  ? (
+            <div className="flex justify-center w-full">
+            <button
+              key={0}
+              onClick={() => changeNote(-1)}
+              className={`mr-3 px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
+            >
+              <Image
+                src="/Logo/bad.svg"
+                alt="Icone"
+                width={60}
+                height={60}
+                className="icon"
+              />
+            </button>
+
+            <button
+              key={1}
+              onClick={() => changeNote(1)}
+              className={`px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
+            >
+              <Image
+                src="/Logo/good.svg"
+                alt="Icone"
+                width={60}
+                height={60}
+                className="icon"
+              />
+            </button>
+          </div>
+          ) : null}
         </div>
 
         <div className="px-6 py-4">

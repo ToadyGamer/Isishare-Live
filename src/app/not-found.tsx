@@ -5,7 +5,13 @@ export default function NotFound() {
     <section className="bg-white">
       <div className="container min-h-screen px-6 py-12 mx-auto lg:flex lg:items-center lg:gap-12">
         <div className="wf-ull lg:w-1/2 mt-16">
-          <Image src="/isishare.png" width={30} height={10} alt="" />
+          <Image
+            className="w-full max-w-lg lg:mx-auto"
+            src="/isishare.png"
+            width={300}
+            height={300}
+            alt=""
+          />
           <p className="ml-28 text-gray-500 dark:text-gray-400">
             Désolé, la page que vous recherchez n&apos;existe pas.
           </p>

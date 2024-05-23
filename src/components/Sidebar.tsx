@@ -16,13 +16,13 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex h-screen w-16 flex-col justify-between border-e bg-dark-blue fixed">
+    <div className="flex flex-col justify-between h-screen w-16 border-e bg-dark-blue fixed z-10">
       <div>
         <div className="inline-flex h-16 w-16 items-center justify-center">
           <a
             onClick={setIdUser}
             href="/profile"
-            className="t group relative flex justify-center rounded px-2 py-1.5  text-white hover:bg-white hover:text-light-blue"
+            className="t group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
           >
             <span className="grid w-7 place-content-center rounded-lg">L</span>
             <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
@@ -36,10 +36,9 @@ export default function Sidebar() {
             <div className="py-4">
               <a
                 href="/home"
-                className="t group relative flex justify-center rounded px-2 py-1.5  text-white hover:bg-white hover:text-light-blue"
+                className="t group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
               >
                 <AiOutlineHome />
-
                 <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
                   Accueil
                 </span>
@@ -53,7 +52,6 @@ export default function Sidebar() {
                   className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
                 >
                   <TbUserSearch />
-
                   <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
                     Recherche d&apos;utilisateurs
                   </span>
@@ -66,7 +64,6 @@ export default function Sidebar() {
                   className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
                 >
                   <HiOutlineUserGroup />
-
                   <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
                     Groupes
                   </span>
@@ -75,11 +72,10 @@ export default function Sidebar() {
 
               <li>
                 <a
-                  href=""
+                  href="/recommendation"
                   className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
                 >
                   <FaHandshake />
-
                   <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
                     Recommandations
                   </span>
@@ -92,7 +88,6 @@ export default function Sidebar() {
                   className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
                 >
                   <MdOutlineForum />
-
                   <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
                     Forum
                   </span>
@@ -110,7 +105,6 @@ export default function Sidebar() {
             href="/"
           >
             <HiOutlineLogout />
-
             <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
               Déconnexion
             </span>
