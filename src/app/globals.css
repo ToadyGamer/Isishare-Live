@@ -3,6 +3,38 @@
 @tailwind utilities;
 
 @layer base {
+
+
+
+
+.containerForum {
+    display: grid;
+    grid-template-rows: 1fr 100px;
+    min-height: 100vh;
+}
+
+.mainForum {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    width: calc(100% - 40px);
+    max-width: 900px;
+    margin: 20px auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 3px 10px 1px rgba(0,0,0,0.2);
+  }
+
+  .titleForum {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    margin: 0;
+    color: white;
+    background: #2a429e;
+    font-size: 3vw;
+  }
+
     :root {
         --background: 0 0% 100%;
         --foreground: 0 0% 3.9%;
