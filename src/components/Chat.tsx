@@ -18,25 +18,27 @@ const Chat: React.FC = () => {
   const [ablyClient, setAblyClient] = useState<Ably.Realtime | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [currentChannelId, setCurrentChannelId] = useState<string>('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<{ [channelId: string]: Message[] }>({});
   const [input, setInput] = useState<string>('');
   const [newChannelName, setNewChannelName] = useState<string>('');
 
   useEffect(() => {
+    // Fetch user data
     fetch(`${localStorage.getItem("api")}users/id/${localStorage.getItem("idActualUser")}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      setName(data[0].name);
-    })
-    .catch((error) => {
-      console.error("Error fetching user data:", error);
-    });
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setName(data[0].name);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
 
+    // Initialize Ably client
     const client = new Ably.Realtime({ key: 'ElzakQ.Woi1lw:jTZkEKo0QrxsC65hfSEkqHUCveUa7Gzo1J2TqoMytx8' });
     setAblyClient(client);
 
@@ -44,9 +46,9 @@ const Chat: React.FC = () => {
       client.close();
     };
   }, []);
-  
 
   useEffect(() => {
+    // Subscribe to channel_added events
     if (!ablyClient) return;
 
     const channelsChannel = ablyClient.channels.get('channels');
@@ -62,22 +64,32 @@ const Chat: React.FC = () => {
   }, [ablyClient]);
 
   useEffect(() => {
+    // Subscribe to message_added events for the current channel
     if (!ablyClient || !currentChannelId) return;
-
+  
     const messagesChannel = ablyClient.channels.get(`channel:${currentChannelId}`);
     messagesChannel.attach();
-    messagesChannel.subscribe('message_added', (message: Ably.Message) => {
+    const messageHandler = (message: Ably.Message) => {
       const newMessage = message.data as Message;
-      setMessages(prevMessages => [...prevMessages, newMessage]);
-    });
-
+      setMessages(prevMessages => ({
+        ...prevMessages,
+        [currentChannelId]: [...(prevMessages[currentChannelId] || []), newMessage],
+      }));
+    };
+    messagesChannel.subscribe('message_added', messageHandler);
+  
     return () => {
-      messagesChannel.detach();
+      messagesChannel.unsubscribe('message_added', messageHandler);
     };
   }, [ablyClient, currentChannelId]);
 
   const handleChannelChange = (channelId: string) => {
     setCurrentChannelId(channelId);
+    // Load messages for the selected channel
+    setMessages(prevMessages => ({
+      ...prevMessages,
+      [channelId]: prevMessages[channelId] || [],
+    }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -138,7 +150,7 @@ const Chat: React.FC = () => {
       <div className="w-3/4 bg-gray-100 p-4 flex flex-col">
         <h2 className="text-xl font-bold mb-4">Messages</h2>
         <div className="flex-1 overflow-y-auto mb-4 p-2 border border-gray-300 rounded bg-white">
-          {messages.map((message, index) => (
+          {(messages[currentChannelId] || []).map((message, index) => (
             <div key={index} className="mb-2">
               <strong>{message.sender}: </strong>{message.content}
             </div>
@@ -163,7 +175,6 @@ const Chat: React.FC = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Chat;
