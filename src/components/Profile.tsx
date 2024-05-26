@@ -8,6 +8,7 @@ export default function Profile() {
     id: string;
     icon: string;
     name: string;
+    notation: string;
   }
 
   interface ContactInfo {
@@ -23,6 +24,8 @@ export default function Profile() {
 
   const [name, setName] = useState<string>('');
   const [points, setPoints] = useState<number>(0);
+  const [notation, setNotation] = useState<number>(0);
+  const [admin, setAdmin] = useState<string>("0");
   const [contacts, setContacts] = useState<ContactInfo[]>([]);
   const [sources, setSources] = useState<SourceInfo[]>([]);
   const [ownUser, setOwnUser] = useState(false);
@@ -36,6 +39,8 @@ export default function Profile() {
   const [info, setInfo] = useState<string>("");
 
   useEffect(() => {
+    setAdmin(localStorage.getItem("isAdmin") + "");
+
     if (typeof window !== 'undefined') {
       const actualUser = localStorage.getItem("idActualUser") || "0";
       const targetUser = localStorage.getItem("idTargetUser") || "0";
@@ -70,6 +75,7 @@ export default function Profile() {
         .then((data) => {
           setName(data[0].name);
           setPoints(data[0].points);
+          setNotation(data[0].notation);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -155,8 +161,9 @@ export default function Profile() {
   };
 
   const changeNote = (value: any) => {
+    console.log(notations);
     const alreadyNote = notations.some(notation =>
-      notation.user_id_receiver === idTargetUser && notation.user_id_assessor === idActualUser
+      notation.user_id_receiver == idTargetUser && notation.user_id_assessor == idActualUser
     );
 
     if (!alreadyNote) {
@@ -176,9 +183,7 @@ export default function Profile() {
           console.error("Error updating notation:", error);
         });
 
-      fetch(
-        `${localStorage.getItem("api")}notations/insert/user_id_receiver,user_id_assessor/"${idTargetUser}","${idActualUser}"`
-      )
+      fetch(`${localStorage.getItem("api")}notations/insert/user_id_receiver,user_id_assessor/"${idTargetUser}","${idActualUser}"`)
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -186,7 +191,7 @@ export default function Profile() {
           return response.json();
         })
         .then(() => {
-          setNotations([...notations, { user_id_receiver: idTargetUser, user_id_assessor: idActualUser }]);
+          window.location.reload();
         })
         .catch((error) => {
           console.error("Error inserting notation:", error);
@@ -196,236 +201,490 @@ export default function Profile() {
     }
   }
 
-  return (
-    <div>
-      <div className="ml-10 w-1/5 max-w-sm overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 float-right mr-10 mt-[88px]">
-        <Image
-          className="object-cover object-center w-full"
-          src="/male-avatar.jpeg"
-          width={300}
-          height={300}
-          alt="avatar"
-          />
-        <div className="items-center px-6 py-4 bg-dark-blue">
-          <div className="flex justify-center w-full">
-            <h1 className="mx-3 text-lg font-semibold text-white">
-              NOM : {name}
-            </h1>
-            <br />
-            <h1 className="mx-3 text-lg font-semibold text-white">
-              POINTS : {points}
-            </h1>
-          </div>
-          {idTargetUser != idActualUser  ? (
+
+  if(window.innerWidth > 500){
+    return (
+      <div>
+        <div className="ml-10 w-1/5 max-w-sm overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 float-right mr-10 mt-[88px]">
+          <Image
+            className="object-cover object-center w-full"
+            src="/male-avatar.jpeg"
+            width={300}
+            height={300}
+            alt="avatar"
+            />
+          <div className="items-center px-6 py-4 bg-dark-blue">
             <div className="flex justify-center w-full">
-            <button
-              key={0}
-              onClick={() => changeNote(-1)}
-              className={`mr-3 px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
-            >
-              <Image
-                src="/Logo/bad.svg"
-                alt="Icone"
-                width={60}
-                height={60}
-                className="icon"
-              />
-            </button>
-
-            <button
-              key={1}
-              onClick={() => changeNote(1)}
-              className={`px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
-            >
-              <Image
-                src="/Logo/good.svg"
-                alt="Icone"
-                width={60}
-                height={60}
-                className="icon"
-              />
-            </button>
-          </div>
-          ) : null}
-        </div>
-
-        <div className="px-6 py-4">
-          {contacts.map((contact, index) => (
-            <div key={index} className="flex items-center justify-between my-4">
-              <div className="flex items-center">
-                {sources.map((source, indexs) => (
-                  <div key={indexs}>
-                    {source.id == contact.source_id ? (
-                      <Image
-                        className="object-cover w-10 h-10"
-                        src={"/" + source.icon}
-                        width={100}
-                        height={100}
-                        alt="discord-logo"
-                      />
-                    ) : null}
-                  </div>
-                ))}
-                <h1 className="px-2 text-sm text-black dark:text-white">
-                  {contact.information}
+              <h1 className="mx-3 text-lg font-semibold text-white">
+                NOM : {name}
+              </h1>
+              <br />
+              <h1 className="mx-3 text-lg font-semibold text-white">
+                POINTS : {points}
+              </h1>
+            </div>
+            {idTargetUser != idActualUser ? (
+              <div className="flex justify-center w-full">
+              <button
+                key={0}
+                onClick={() => changeNote(-1)}
+                className={`mr-3 px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
+              >
+                <Image
+                  src="/Logo/bad.svg"
+                  alt="Icone"
+                  width={60}
+                  height={60}
+                  className="icon"
+                />
+              </button>
+  
+              <button
+                key={1}
+                onClick={() => changeNote(1)}
+                className={`px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
+              >
+                <Image
+                  src="/Logo/good.svg"
+                  alt="Icone"
+                  width={60}
+                  height={60}
+                  className="icon"
+                />
+              </button>
+            </div>
+            ) : null}
+            {admin == "1" ? (
+              <div className="flex justify-center w-full">
+                <h1 className="mx-3 text-lg font-semibold text-white">
+                  NOTATION : {notation}
                 </h1>
               </div>
+            ) : null}
+          </div>
+  
+          <div className="px-6 py-4">
+            {contacts.map((contact, index) => (
+              <div key={index} className="flex items-center justify-between my-4">
+                <div className="flex items-center">
+                  {sources.map((source, indexs) => (
+                    <div key={indexs}>
+                      {source.id == contact.source_id ? (
+                          <div className="w-10 h-10">
+                          <Image
+                            className="object-cover w-10 h-10"
+                            src={"/" + source.icon}
+                            width={100}
+                            height={100}
+                            alt="discord-logo"
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                  <h1 className="px-2 text-sm text-black dark:text-white">
+                    {contact.information}
+                  </h1>
+                </div>
+                {ownUser || admin == "1" ? (
+                  <button
+                    onClick={() => deleteContactTrigger(contact.id)}
+                    className="flex items-center px-6 py-2 ml-4 tracking-wide text-black capitalize transition-scale duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                  >
+                    <GoTrash size={30} style={{ color: "red" }} />
+                  </button>
+                ) : null}
+              </div>
+            ))}
+            <div className="flex items-center mt-4 text-gray-700 dark:text-gray-200">
               {ownUser ? (
                 <button
-                  onClick={() => deleteContactTrigger(contact.id)}
-                  className="flex items-center px-6 py-2 ml-4 tracking-wide text-black capitalize transition-scale duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                  onClick={() => setShowAdd(true)}
+                  className="px-6 py-2 mx-auto tracking-wide text-white  transition-colors duration-300 transform bg-dark-blue  rounded-md hover:bg-light-blue focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
                 >
-                  <GoTrash size={30} style={{ color: "red" }} />
+                  Ajouter un contact
                 </button>
               ) : null}
             </div>
-          ))}
-          <div className="flex items-center mt-4 text-gray-700 dark:text-gray-200">
-            {ownUser ? (
-              <button
-                onClick={() => setShowAdd(true)}
-                className="px-6 py-2 mx-auto tracking-wide text-white  transition-colors duration-300 transform bg-dark-blue  rounded-md hover:bg-light-blue focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
-              >
-                Ajouter un contact
-              </button>
-            ) : null}
           </div>
         </div>
+  
+        {showAdd ? (
+          <>
+            <div
+              className="fixed inset-0 z-10 overflow-y-auto"
+              aria-labelledby="modal-title"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <span
+                  className="hidden sm:inline-block sm:h-screen sm:align-middle"
+                  aria-hidden="true"
+                >
+                  &#8203;
+                </span>
+  
+                <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
+                  <h3
+                    className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
+                    id="modal-title"
+                  >
+                    Ajouter un contact
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Ajouter un moyen de contact à votre profile !
+                  </p>
+                  <form className="mt-4" action="#">
+                    <label className="block mt-3">
+                      <select
+                        onChange={handleSourceChange}
+                        name="sources"
+                        id="sources"
+                        className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                      >
+                        <option value="">Sélectionner une source</option>
+                        {sources.map((source, index) => (
+                          <option key={source.id} value={source.id}>
+                            {source.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+  
+                    <label className="block mt-3">
+                      <input
+                        onChange={handlePseudoChange}
+                        type="text"
+                        name="pseudo"
+                        id="pseudo"
+                        placeholder="Pseudo"
+                        className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                      />
+                    </label>
+  
+                    <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAdd(false);
+                        }}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Retour
+                      </button>
+  
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addContact();
+                        }}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
+  
+        {showDelete ? (
+          <>
+            <div
+              className="fixed inset-0 z-10 overflow-y-auto"
+              aria-labelledby="modal-title"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <span
+                  className="hidden sm:inline-block sm:h-screen sm:align-middle"
+                  aria-hidden="true"
+                >
+                  &#8203;
+                </span>
+  
+                <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
+                  <h3
+                    className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
+                    id="modal-title"
+                  >
+                    Suppression d&apos;un contact
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Êtes vous sure de vouloir supprimer ce contact ?
+                  </p>
+  
+                  <form className="mt-4" action="#">
+                    <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowDelete(false)}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Non
+                      </button>
+  
+                      <button
+                        type="button"
+                        onClick={deleteContact}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Oui
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
       </div>
-
-      {showAdd ? (
-        <>
-          <div
-            className="fixed inset-0 z-10 overflow-y-auto"
-            aria-labelledby="modal-title"
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-              <span
-                className="hidden sm:inline-block sm:h-screen sm:align-middle"
-                aria-hidden="true"
+    );
+  }
+  else{
+    return (
+      <div>
+        <div className="w-4/5 bg-white rounded-lg shadow-lg dark:bg-gray-800 mt-[20px] mx-auto relative">
+          <Image
+            className="object-cover object-center w-full"
+            src="/male-avatar.jpeg"
+            width={300}
+            height={300}
+            alt="avatar"
+            />
+          <div className="items-center px-6 py-4 bg-dark-blue">
+            <div className="flex justify-center w-full">
+              <h1 className="mx-3 text-lg font-semibold text-white">
+                NOM : {name}
+              </h1>
+              <br />
+              <h1 className="mx-3 text-lg font-semibold text-white">
+                POINTS : {points}
+              </h1>
+            </div>
+            {idTargetUser != idActualUser ? (
+              <div className="flex justify-center w-full">
+              <button
+                key={0}
+                onClick={() => changeNote(-1)}
+                className={`mr-3 px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
               >
-                &#8203;
-              </span>
-
-              <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
-                <h3
-                  className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
-                  id="modal-title"
+                <Image
+                  src="/Logo/bad.svg"
+                  alt="Icone"
+                  width={60}
+                  height={60}
+                  className="icon"
+                />
+              </button>
+  
+              <button
+                key={1}
+                onClick={() => changeNote(1)}
+                className={`px-2 py-2 rounded text-white hover:bg-light-blue ease-in duration-300 ...`}
+              >
+                <Image
+                  src="/Logo/good.svg"
+                  alt="Icone"
+                  width={60}
+                  height={60}
+                  className="icon"
+                />
+              </button>
+            </div>
+            ) : null}
+            {admin == "1" ? (
+              <div className="flex justify-center w-full">
+                <h1 className="mx-3 text-lg font-semibold text-white">
+                  NOTATION : {notation}
+                </h1>
+              </div>
+            ) : null}
+          </div>
+          <div className="px-6 py-4">
+            {contacts.map((contact, index) => (
+              <div key={index} className="flex items-center justify-between my-4">
+                <div className="flex items-center">
+                  {sources.map((source, indexs) => (
+                    <div key={indexs}>
+                        {source.id == contact.source_id ? (
+                          <div className="w-10 h-10">
+                            <Image
+                              className="object-cover w-10 h-10"
+                              src={"/" + source.icon}
+                              width={100}
+                              height={100}
+                              alt="discord-logo"
+                            />
+                          </div>
+                        ) : null}
+                    </div>
+                  ))}
+                  <h1 className="px-2 text-sm text-black dark:text-white">
+                    {contact.information}
+                  </h1>
+                </div>
+                {ownUser || admin == "1" ? (
+                  <button
+                    onClick={() => deleteContactTrigger(contact.id)}
+                    className="flex items-center px-6 py-2 ml-4 tracking-wide text-black capitalize transition-scale duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                  >
+                    <GoTrash size={30} style={{ color: "red" }} />
+                  </button>
+                ) : null}
+              </div>
+            ))}
+            <div className="flex items-center mt-4 text-gray-700 dark:text-gray-200">
+              {ownUser ? (
+                <button
+                  onClick={() => setShowAdd(true)}
+                  className="px-6 py-2 mx-auto tracking-wide text-white  transition-colors duration-300 transform bg-dark-blue  rounded-md hover:bg-light-blue focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-80"
                 >
                   Ajouter un contact
-                </h3>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Ajouter un moyen de contact à votre profile !
-                </p>
-                <form className="mt-4" action="#">
-                  <label className="block mt-3">
-                    <select
-                      onChange={handleSourceChange}
-                      name="sources"
-                      id="sources"
-                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
-                    >
-                      <option value="">Sélectionner une source</option>
-                      {sources.map((source, index) => (
-                        <option key={source.id} value={source.id}>
-                          {source.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="block mt-3">
-                    <input
-                      onChange={handlePseudoChange}
-                      type="text"
-                      name="pseudo"
-                      id="pseudo"
-                      placeholder="Pseudo"
-                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
-                    />
-                  </label>
-
-                  <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAdd(false);
-                      }}
-                      className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
-                    >
-                      Retour
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        addContact();
-                      }}
-                      className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
-                    >
-                      Ajouter
-                    </button>
-                  </div>
-                </form>
-              </div>
+                </button>
+              ) : null}
             </div>
           </div>
-        </>
-      ) : null}
-
-      {showDelete ? (
-        <>
-          <div
-            className="fixed inset-0 z-10 overflow-y-auto"
-            aria-labelledby="modal-title"
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-              <span
-                className="hidden sm:inline-block sm:h-screen sm:align-middle"
-                aria-hidden="true"
-              >
-                &#8203;
-              </span>
-
-              <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
-                <h3
-                  className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
-                  id="modal-title"
+        </div>
+  
+        {showAdd ? (
+          <>
+            <div
+              className="fixed inset-0 z-10 overflow-y-auto"
+              aria-labelledby="modal-title"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <span
+                  className="hidden sm:inline-block sm:h-screen sm:align-middle"
+                  aria-hidden="true"
                 >
-                  Suppression d&apos;un contact
-                </h3>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Êtes vous sure de vouloir supprimer ce contact ?
-                </p>
-
-                <form className="mt-4" action="#">
-                  <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowDelete(false)}
-                      className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
-                    >
-                      Non
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={deleteContact}
-                      className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
-                    >
-                      Oui
-                    </button>
-                  </div>
-                </form>
+                  &#8203;
+                </span>
+  
+                <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
+                  <h3
+                    className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
+                    id="modal-title"
+                  >
+                    Ajouter un contact
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Ajouter un moyen de contact à votre profile !
+                  </p>
+                  <form className="mt-4" action="#">
+                    <label className="block mt-3">
+                      <select
+                        onChange={handleSourceChange}
+                        name="sources"
+                        id="sources"
+                        className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                      >
+                        <option value="">Sélectionner une source</option>
+                        {sources.map((source, index) => (
+                          <option key={source.id} value={source.id}>
+                            {source.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+  
+                    <label className="block mt-3">
+                      <input
+                        onChange={handlePseudoChange}
+                        type="text"
+                        name="pseudo"
+                        id="pseudo"
+                        placeholder="Pseudo"
+                        className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
+                      />
+                    </label>
+  
+                    <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAdd(false);
+                        }}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Retour
+                      </button>
+  
+                      <button
+                        type="button"
+                        onClick={() => {
+                          addContact();
+                        }}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
-        </>
-      ) : null}
-    </div>
-  );
+          </>
+        ) : null}
+  
+        {showDelete ? (
+          <>
+            <div
+              className="fixed inset-0 z-10 overflow-y-auto"
+              aria-labelledby="modal-title"
+              role="dialog"
+              aria-modal="true"
+            >
+              <div className="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <span
+                  className="hidden sm:inline-block sm:h-screen sm:align-middle"
+                  aria-hidden="true"
+                >
+                  &#8203;
+                </span>
+  
+                <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
+                  <h3
+                    className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
+                    id="modal-title"
+                  >
+                    Suppression d&apos;un contact
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    Êtes vous sure de vouloir supprimer ce contact ?
+                  </p>
+  
+                  <form className="mt-4" action="#">
+                    <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowDelete(false)}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Non
+                      </button>
+  
+                      <button
+                        type="button"
+                        onClick={deleteContact}
+                        className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
+                      >
+                        Oui
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : null}
+      </div>
+    );
+  }
 }

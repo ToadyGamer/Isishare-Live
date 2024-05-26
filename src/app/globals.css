@@ -167,10 +167,8 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: 1fr;
-    grid-column-gap: 10vw;
     grid-row-gap: 0px;
     width: 80vw;
-    margin-left: 5vw;
 }
     
 .div1Recom { grid-area: 1 / 1 / 2 / 2; }

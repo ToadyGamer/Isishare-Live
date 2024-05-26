@@ -21,8 +21,11 @@ const Chat: React.FC = () => {
   const [messages, setMessages] = useState<{ [channelId: string]: Message[] }>({});
   const [input, setInput] = useState<string>('');
   const [newChannelName, setNewChannelName] = useState<string>('');
+  const [isClient, setIsClient] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsClient(true);
+
     // Fetch user data
     fetch(`${localStorage.getItem("api")}users/id/${localStorage.getItem("idActualUser")}`)
       .then((response) => {
@@ -46,6 +49,16 @@ const Chat: React.FC = () => {
       client.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      const storedChannels = localStorage.getItem('channels');
+      setChannels(storedChannels ? JSON.parse(storedChannels) : []);
+
+      const storedMessages = localStorage.getItem('messages');
+      setMessages(storedMessages ? JSON.parse(storedMessages) : {});
+    }
+  }, [isClient]);
 
   useEffect(() => {
     // Subscribe to channel_added events
@@ -113,6 +126,24 @@ const Chat: React.FC = () => {
     setNewChannelName('');
   };
 
+  // Effet pour sauvegarder les messages dans le localStorage à chaque changement
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('messages', JSON.stringify(messages));
+    }
+  }, [messages, isClient]);
+
+  // Effet pour sauvegarder les channels dans le localStorage à chaque changement
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('channels', JSON.stringify(channels));
+    }
+  }, [channels, isClient]);
+
+  if (!isClient) {
+    return null; // Rend un contenu vide tant que le composant n'est pas monté côté client
+  }
+
   return (
     <div className="flex">
       <div className="w-1/4 bg-gray-800 p-4 flex flex-col justify-between">
@@ -143,7 +174,7 @@ const Chat: React.FC = () => {
             className="w-full p-2 rounded"
             style={{ backgroundColor: '#2a429e', color: 'white' }}
           >
-            Create Channel
+            Créer un Channel
           </button>
         </div>
       </div>
@@ -169,7 +200,7 @@ const Chat: React.FC = () => {
             className="p-2 rounded"
             style={{ backgroundColor: '#2a429e', color: 'white' }}
           >
-            Send
+            Envoyer
           </button>
         </form>
       </div>

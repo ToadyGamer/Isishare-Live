@@ -8,6 +8,7 @@ export default function Login() {
     id: string;
     email: string;
     password: string;
+    admin: string;
   }
 
   const [idUser, setIdUser] = useState<string>("");
@@ -16,7 +17,7 @@ export default function Login() {
   const [infoLogin, setInfoLogin] = useState<UserInfo[]>([]);
 
   useEffect(() => {
-    localStorage.setItem("api", "https://slug-ruling-noticeably.ngrok-free.app/api/");
+    localStorage.setItem("api", "http://localhost:3001/api/");
 
     fetch(`${localStorage.getItem("api")}users`)
       .then((response) => {
@@ -41,6 +42,7 @@ export default function Login() {
         document.location.href = "/home";
         setIdUser(infoLogin[i].id);
         localStorage.setItem("idActualUser", infoLogin[i].id.toString());
+        localStorage.setItem("isAdmin", infoLogin[i].admin.toString());
         userFind = true;
       }
     }

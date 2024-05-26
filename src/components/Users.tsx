@@ -31,6 +31,7 @@ const Users = () => {
   }
 
   const [users, setUsers] = useState<UserInfo[]>([]);
+  const [admin, setAdmin] = useState<string>("0");
   const [knowledges, setknowledges] = useState<KnowledgInfo[]>([]);
   const [goals, setGoals] = useState<GoalInfo[]>([]);
   const [interests, setInterests] = useState<InterestInfo[]>([]);
@@ -46,6 +47,8 @@ const Users = () => {
 
   // Recupere les datas via l'api
   useEffect(() => {
+    setAdmin(localStorage.getItem("isAdmin") + "");
+
     const fetchData = async () => {
       try {
         // Récupérer les utilisateurs
@@ -195,8 +198,8 @@ const Users = () => {
         />
       </div>
       {/* #endregion */}
-      <div className="flex justify-between items-center mt-2 mb-4">
-        <div>
+      <div className="flex justify-between items-center">
+        <div className="mt-2">
           {/* Barre de recherche */}
           <input
             type="text"
@@ -668,11 +671,19 @@ const Users = () => {
                         </div>
                       )}
                   </div>
-
-                  <div className="flex justify-end mt-4">
-                    <a href="#" className="text-lg font-medium" role="link">
-                      Points : {user.points}
-                    </a>
+                  <div className="flex justify-between mt-6">
+                    {admin == "1" ? (
+                      <div className="flex-1">
+                        <a href="#" className="text-lg font-medium" role="link">
+                          Notation : {user.notation}
+                        </a>
+                      </div>
+                    ) : null}
+                    <div className="flex-1 text-right">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : {user.points}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -753,11 +764,19 @@ const Users = () => {
                         </div>
                       )}
                   </div>
-
-                  <div className="flex justify-end mt-4">
-                    <a href="#" className="text-lg font-medium" role="link">
-                      Points : {user.points}
-                    </a>
+                  <div className="flex justify-between mt-6">
+                    {admin == "1" ? (
+                      <div className="flex-1">
+                        <a href="#" className="text-lg font-medium" role="link">
+                          Notation : {user.notation}
+                        </a>
+                      </div>
+                    ) : null}
+                    <div className="flex-1 text-right">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : {user.points}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -838,11 +857,19 @@ const Users = () => {
                         </div>
                       )}
                   </div>
-
-                  <div className="flex justify-end mt-4">
-                    <a href="#" className="text-lg font-medium" role="link">
-                      Points : {user.points}
-                    </a>
+                  <div className="flex justify-between mt-6">
+                    {admin == "1" ? (
+                      <div className="flex-1">
+                        <a href="#" className="text-lg font-medium" role="link">
+                          Notation : {user.notation}
+                        </a>
+                      </div>
+                    ) : null}
+                    <div className="flex-1 text-right">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : {user.points}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
