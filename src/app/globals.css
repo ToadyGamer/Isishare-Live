@@ -76,11 +76,6 @@
         --light-gray-transparent: #bbbbbc76;
     }
 
-    #buttontogglePopup {
-        position: relative;
-        top: 0.5vh;
-    }
-
     .dark {
         --background: 0 0% 3.9%;
         --foreground: 0 0% 98%;
@@ -138,7 +133,7 @@
     padding: 0.5rem;
     border: 1px solid #bbbbbc;
     border-radius: 4px;
-    width: 300px;
+    width: 30vw;
     outline: none;
 }
 

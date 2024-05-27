@@ -145,15 +145,17 @@ const Chat: React.FC = () => {
   }
 
   return (
-    <div className="flex">
-      <div className="w-1/4 bg-gray-800 p-4 flex flex-col justify-between">
+    <div className="flex flex-col md:flex-row">
+      <div className="w-full md:w-1/4 bg-gray-800 p-4 flex flex-col justify-between">
         <div>
           <h2 className="text-xl font-bold mb-4 text-black">Channels</h2>
           <ul className="space-y-2">
-            {channels.map(channel => (
+            {channels.map((channel) => (
               <li
                 key={channel.id}
-                className={`p-2 rounded cursor-pointer ${currentChannelId === channel.id ? 'bg-[#609cf3]' : 'bg-gray-600 hover:bg-gray-700'}`}
+                className={`p-2 rounded cursor-pointer ${
+                  currentChannelId === channel.id ? "bg-[#609cf3]" : "bg-gray-600 hover:bg-gray-700"
+                }`}
                 onClick={() => handleChannelChange(channel.id)}
               >
                 {channel.name}
@@ -172,13 +174,13 @@ const Chat: React.FC = () => {
           <button
             onClick={handleCreateChannel}
             className="w-full p-2 rounded"
-            style={{ backgroundColor: '#2a429e', color: 'white' }}
+            style={{ backgroundColor: "#2a429e", color: "white" }}
           >
             Créer un Channel
           </button>
         </div>
       </div>
-      <div className="w-3/4 bg-gray-100 p-4 flex flex-col">
+      <div className="w-full md:w-3/4 bg-gray-100 p-4 flex flex-col">
         <h2 className="text-xl font-bold mb-4">Messages</h2>
         <div className="flex-1 overflow-y-auto mb-4 p-2 border border-gray-300 rounded bg-white">
           {(messages[currentChannelId] || []).map((message, index) => (
@@ -187,10 +189,10 @@ const Chat: React.FC = () => {
             </div>
           ))}
         </div>
-        <form onSubmit={handleSubmit} className="flex">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row">
           <input
             type="text"
-            className="flex-1 p-2 border border-gray-300 rounded mr-2"
+            className="flex-1 p-2 border border-gray-300 rounded mb-2 sm:mb-0 sm:mr-2"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
@@ -198,7 +200,7 @@ const Chat: React.FC = () => {
           <button
             type="submit"
             className="p-2 rounded"
-            style={{ backgroundColor: '#2a429e', color: 'white' }}
+            style={{ backgroundColor: "#2a429e", color: "white" }}
           >
             Envoyer
           </button>
