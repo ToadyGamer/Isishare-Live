@@ -15,6 +15,7 @@ export default function WTL() {
     description: string;
   }
 
+  const [isLoading, setIsLoading] = useState(true);
   const [admin, setAdmin] = useState<string>("0");
   const [wantToLearns, setWantToLearn] = useState<WTLInfo[]>([]);
   const [interets, setInterets] = useState<InterestInfo[]>([]);
@@ -22,17 +23,9 @@ export default function WTL() {
 
   useEffect(() => {
     setAdmin(localStorage.getItem("isAdmin") + "");
-    if (
-      localStorage.getItem("idActualUser") ==
-      localStorage.getItem("idTargetUser")
-    )
-      setOwnUser(true);
+    if (localStorage.getItem("idActualUser") == localStorage.getItem("idTargetUser")) setOwnUser(true);
 
-    fetch(
-      `${localStorage.getItem("api")}objectifs/user/${localStorage.getItem(
-        "idTargetUser"
-      )}`
-    )
+    const fetchWTL = fetch(`${localStorage.getItem("api")}objectifs/user/${localStorage.getItem("idTargetUser")}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -46,7 +39,7 @@ export default function WTL() {
         console.error("Error fetching users:", error);
       });
 
-    fetch(`${localStorage.getItem("api")}interests`)
+    const fetchInterets = fetch(`${localStorage.getItem("api")}interests`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -58,6 +51,10 @@ export default function WTL() {
       })
       .catch((error) => {
         console.error("Error fetching users:", error);
+      });
+
+      Promise.all([fetchWTL, fetchInterets]).then(() => {
+        setIsLoading(false);
       });
   }, []);
 
@@ -103,13 +100,7 @@ export default function WTL() {
   };
 
   const addWTL = () => {
-    fetch(
-      `${localStorage.getItem(
-        "api"
-      )}objectifs/insert/user_id,interest_id,description/"${localStorage.getItem(
-        "idTargetUser"
-      )}","${interet}","${description}"`
-    )
+    fetch(`${localStorage.getItem("api")}objectifs/insert/user_id,interest_id,description/"${localStorage.getItem("idTargetUser")}","${interet}","${description}"`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -151,7 +142,27 @@ export default function WTL() {
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8 ">
               <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                 <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg rounded-lg shadow-lg">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                {isLoading ? (
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                          <th className="bg-dark-blue px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-white dark:text-gray-400 w-1/8">Connaissance</th>
+                          <th className="bg-dark-blue px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-white dark:text-gray-400 w-4/5">Description</th>
+                          <th className="bg-dark-blue px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-white dark:text-gray-400 w-1/5">{ownUser ? "Action" : ""}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                        {[...Array(2)].map((_, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-4"><div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                            <td className="px-4 py-4"><div className="w-10 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                            <td className="px-4 py-4"><div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-800">
                       <tr>
                         <th
@@ -219,11 +230,13 @@ export default function WTL() {
                     ))}
                     </tbody>
                   </table>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </section>
+        
         {showAdd ? (
           <>
             <div
@@ -381,7 +394,27 @@ export default function WTL() {
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                 <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg rounded-lg shadow-lg">
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                {isLoading ? (
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                          <th className="bg-dark-blue px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-white dark:text-gray-400 w-1/8">Connaissance</th>
+                          <th className="bg-dark-blue px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-white dark:text-gray-400 w-4/5">Description</th>
+                          <th className="bg-dark-blue px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-white dark:text-gray-400 w-1/5">{ownUser ? "Action" : ""}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                        {[...Array(2)].map((_, index) => (
+                          <tr key={index}>
+                            <td className="px-4 py-4"><div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                            <td className="px-4 py-4"><div className="w-10 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                            <td className="px-4 py-4"><div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-800">
                       <tr>
                         <th
@@ -449,6 +482,7 @@ export default function WTL() {
                     ))}
                     </tbody>
                   </table>
+                  )}
                 </div>
               </div>
             </div>

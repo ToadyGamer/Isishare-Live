@@ -3,6 +3,7 @@ import { AiOutlineHome } from "react-icons/ai";
 import { TbUserSearch } from "react-icons/tb";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { MdOutlineForum } from "react-icons/md";
+import { MdAdminPanelSettings } from "react-icons/md";
 import { FaHandshake } from "react-icons/fa";
 import { HiOutlineLogout } from "react-icons/hi";
 
@@ -99,6 +100,18 @@ export default function Sidebar() {
                     </span>
                   </a>
                 </li>
+
+                <li>
+                  <a
+                    href="/accounts"
+                    className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
+                  >
+                    <MdAdminPanelSettings />
+                    <span className="absolute start-full top-1/2 ms-4 -translate-y-1/2 rounded bg-black px-2 py-1.5 text-xs font-medium text-white invisible group-hover:visible">
+                      Comptes Admin
+                    </span>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -165,6 +178,13 @@ export default function Sidebar() {
               className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
             >
               <MdOutlineForum />
+            </a>
+
+            <a
+              href="/accounts"
+              className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
+            >
+              <MdAdminPanelSettings />
             </a>
           </div>
     
