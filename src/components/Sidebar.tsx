@@ -6,8 +6,22 @@ import { MdOutlineForum } from "react-icons/md";
 import { MdAdminPanelSettings } from "react-icons/md";
 import { FaHandshake } from "react-icons/fa";
 import { HiOutlineLogout } from "react-icons/hi";
+import { useEffect, useState } from "react";
 
 export default function Sidebar() {
+
+  const [admin, setAdmin] = useState<string>("0");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const usersIDResponse = await fetch(`${localStorage.getItem("api")}users/id/${localStorage.getItem("idActualUser")}`);
+      const usersIDData = await usersIDResponse.json();
+      setAdmin(usersIDData[0].admin);
+    }
+
+    fetchData();
+  }, []);
+
   const setIdUser = () => {
     localStorage.setItem(
       "idTargetUser",
@@ -101,7 +115,8 @@ export default function Sidebar() {
                   </a>
                 </li>
 
-                <li>
+                {admin == "1" ? (
+                  <li>
                   <a
                     href="/accounts"
                     className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
@@ -112,6 +127,7 @@ export default function Sidebar() {
                     </span>
                   </a>
                 </li>
+                ) : null}
               </ul>
             </div>
           </div>
@@ -180,12 +196,13 @@ export default function Sidebar() {
               <MdOutlineForum />
             </a>
 
-            <a
-              href="/accounts"
-              className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue"
-            >
-              <MdAdminPanelSettings />
-            </a>
+            {admin == "1" ? (
+              <a
+                href="/accounts"
+                className="group relative flex justify-center rounded px-2 py-1.5 text-white hover:bg-white hover:text-light-blue">
+                <MdAdminPanelSettings />
+              </a>
+            ):null}
           </div>
     
           <div>

@@ -38,7 +38,7 @@ const Accounts = () => {
 
         const usersIDResponse = await fetch(`${localStorage.getItem("api")}users/id/${localStorage.getItem("idActualUser")}`);
         const usersIDData = await usersIDResponse.json();
-        setMailSender(usersData[0].email);
+        setMailSender(usersIDData[0].email);
 
         setIsLoading(false);
       } catch (error) {
