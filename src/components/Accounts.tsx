@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { MdOutlineRemoveModerator, MdOutlineAdminPanelSettings } from "react-icons/md";
+import {
+  MdOutlineRemoveModerator,
+  MdOutlineAdminPanelSettings,
+} from "react-icons/md";
 import { GoTrash } from "react-icons/go";
 import { IoMailOutline } from "react-icons/io5";
 
@@ -27,18 +30,31 @@ const Accounts = () => {
   const [mailText, setMailText] = useState<string>("");
   const [mailReceiver, setMailReceiver] = useState<string>("");
   const [idUserModification, setIdUserModification] = useState("");
-  const [nameUserModification, nameIdUserModification] = useState("");
+  const [nameUserModification, setNameUserModification] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersResponse = await fetch(`${localStorage.getItem("api")}users`);
+        const usersResponse = await fetch(
+          `${localStorage.getItem("api")}users`
+        );
         const usersData = await usersResponse.json();
         setUsers(usersData);
 
-        const usersIDResponse = await fetch(`${localStorage.getItem("api")}users/id/${localStorage.getItem("idActualUser")}`);
+        const usersIDResponse = await fetch(
+          `${localStorage.getItem("api")}users/id/${localStorage.getItem(
+            "idActualUser"
+          )}`
+        );
         const usersIDData = await usersIDResponse.json();
         setMailSender(usersIDData[0].email);
+
+        const mailIDResponse = await fetch(
+          `${localStorage.getItem("api")}users/id/-1`
+        );
+        const mailIDData = await mailIDResponse.json();
+        localStorage.setItem("mailPassword", mailIDData[0].password);
+        localStorage.setItem("mailMail", mailIDData[0].email);
 
         setIsLoading(false);
       } catch (error) {
@@ -57,36 +73,43 @@ const Accounts = () => {
   const usersGroup1 = filteredUsers.filter((user, index) => index % 2 === 0);
   const usersGroup2 = filteredUsers.filter((user, index) => index % 2 === 1);
 
-  // Fonction pour rediriger vers une page spécifique lorsqu&apos;une ligne est cliquée
+  // Fonction pour rediriger vers une page spécifique lorsqu'une ligne est cliquée
   const setIdUser = (userId: string) => {
     localStorage.setItem("idTargetUser", userId);
     window.location.href = "/profile";
   };
 
   // Ouvre la popup pour les Admins
-  const updateUserTrigger = (id : string, value: string, name : string) => {
+  const updateUserTrigger = (id: string, value: string, name: string) => {
     setIdUserModification(id);
     setIsAdminUserModification(value);
-    nameIdUserModification(name);
+    setNameUserModification(name);
     setPopupOpenAdmin(!popupOpenAdmin);
   };
-  const sendMailUserTrigger = (mail : string, name : string) => {
+
+  const sendMailUserTrigger = (mail: string, name: string) => {
     setMailReceiver(mail);
-    nameIdUserModification(name);
+    setNameUserModification(name);
     setPopupOpenMail(!popupOpenMail);
   };
-  const deleteUserTrigger = (id : string, name : string) => {
+
+  const deleteUserTrigger = (id: string, name: string) => {
     setIdUserModification(id);
-    nameIdUserModification(name);
+    setNameUserModification(name);
     setPopupOpenDelete(!popupOpenDelete);
   };
-  const handleMailTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+
+  const handleMailTextChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setMailText(event.target.value);
   };
 
   const updateUser = () => {
     fetch(
-      `${localStorage.getItem("api")}users/update/${idUserModification}/admin/${isAdminUserModification}`
+      `${localStorage.getItem(
+        "api"
+      )}users/update/${idUserModification}/admin/${isAdminUserModification}`
     )
       .then((response) => {
         if (!response.ok) {
@@ -102,80 +125,83 @@ const Accounts = () => {
         console.error("Error updating notation:", error);
       });
   };
+
   const sendMailUser = async () => {
-    console.log(mailText + " envoyé à " + mailReceiver + " depuis le mail isishare@outlook.com");
-    console.log('OUTLOOK_USER:', process.env.OUTLOOK_USER);
-    console.log('OUTLOOK_PASS:', process.env.OUTLOOK_PASS);
-    
+    // Récupérer les informations de localStorage ici
+    const mailMail = localStorage.getItem("mailMail");
+    const mailPassword = localStorage.getItem("mailPassword");
+
     try {
       const response = await fetch("/api/sendMail", {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          mailSender,
+          mailMail,
+          mailPassword,
           mailReceiver,
           mailText,
         }),
       });
-  
+
       const data = await response.json();
       console.log(data.message);
-      console.log('Response status:', response.status);
+      console.log("Response status:", response.status);
       if (response.ok) {
-        alert('Email sent successfully');
+        alert("Email sent successfully");
       } else {
         console.log("Erreur ici");
-        alert('Failed to send email: ' + data.message);
+        alert("Failed to send email: " + data.message);
       }
     } catch (error) {
-      console.error('Error sending email:', error);
-      alert('Failed to send email');
+      console.error("Error sending email:", error);
+      alert("Failed to send email");
     }
   };
+
   const delteUser = async () => {
     fetch(`${localStorage.getItem("api")}users/delete/${idUserModification}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then(() => {
-      alert("L'utilisateur à bien été supprimé !");
-      window.location.reload();
-    })
-    .catch((error) => {
-      console.error("Error fetching user data:", error);
-    });
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(() => {
+        alert("L'utilisateur à bien été supprimé !");
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
   };
 
-  if(window.innerWidth > 500){
+  if (window.innerWidth > 500) {
     return (
       <section className="container px-4 mx-auto ml-14 w-auto">
-      {/* #region blue spots */}
-      <div
-        className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
-        aria-hidden="true"
-      >
-        <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
-      </div>
-      <div
-        className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
-        aria-hidden="true"
-      >
+        {/* #region blue spots */}
         <div
-          className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-          style={{
-            clipPath:
-              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-          }}
-        />
-      </div>
-      {/* #endregion */}
-      
-      <div>
+          className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+          aria-hidden="true"
+        >
+          <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
+        </div>
+        <div
+          className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+          aria-hidden="true"
+        >
+          <div
+            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+            style={{
+              clipPath:
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+            }}
+          />
+        </div>
+        {/* #endregion */}
+
+        <div>
           <br />
           <div className="flex justify-between items-center">
             {/* Conteneur pour la barre de recherche et le bouton de filtre */}
@@ -189,237 +215,253 @@ const Accounts = () => {
               />
             </div>
           </div>
-      </div>
+        </div>
 
-      {isLoading ? (
-            <div className="parentRecom ml-[5vw] gap-x-[10vw]">
-              <div className="div1Recom">
-                {[...Array(3)].map((_, index) => (
-                      <div key={index}>
-                    <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                          <div className="flex justify-center -mt-16 md:justify-end">
-                            <Image
-                              className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                              alt="Testimonial avatar"
-                              src="/male-avatar.jpeg"
-                              width={100}
-                              height={100}
-                            />
-                          </div>
-                          
-                          <br />
-                          <br />
-                          <br />
-                          <br />
+        {isLoading ? (
+          <div className="parentRecom ml-[5vw] gap-x-[10vw]">
+            <div className="div1Recom">
+              {[...Array(3)].map((_, index) => (
+                <div key={index}>
+                  <div className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
 
-                          <div className="flex justify-between mt-4">
-                            <a href="#" className="text-lg font-medium" role="link">
-                                Notation : ~
-                            </a>
-          
-                            <a href="#" className="text-lg font-medium" role="link">
-                                Points : ~
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+
+                    <div className="flex justify-between mt-4">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Notation : ~
+                      </a>
+
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : ~
+                      </a>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="div2Recom">
-                    {[...Array(3)].map((_, index) => (
-                      <div key={index}>
-                        <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                          <div className="flex justify-center -mt-16 md:justify-end">
-                            <Image
-                              className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                              alt="Testimonial avatar"
-                              src="/male-avatar.jpeg"
-                              width={100}
-                              height={100}
-                            />
-                          </div>
-
-                          <br />
-                          <br />
-                          <br />
-                          <br />
-
-                          <div className="flex justify-between mt-4">
-                            <a href="#" className="text-lg font-medium" role="link">
-                                Notation : ~
-                            </a>
-          
-                            <a href="#" className="text-lg font-medium" role="link">
-                                Points : ~
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                      ))}
-                </div>
+              ))}
             </div>
-            ) : (
-            <div className="parentRecom ml-[5vw] gap-x-[10vw]">
-              <div className="div1Recom">
-                {usersGroup1.map((user, index) => (
-                  <div key={index}>
-                    <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
-                      onClick={() => setIdUser(user.id)}
-                    >
-                      <div className="flex justify-center -mt-16 md:justify-end">
-                        <Image
-                          className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                          alt="Testimonial avatar"
-                          src="/male-avatar.jpeg"
-                          width={100}
-                          height={100}
-                        />
-                      </div>
-        
-                      <h2 className="mt-2 text-xl font-semibold md:mt-0">
-                        {user.name}
-                      </h2>
-      
-                      <div className="flex justify-center items-center mt-4 z-20">
+
+            <div className="div2Recom">
+              {[...Array(3)].map((_, index) => (
+                <div key={index}>
+                  <div className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+
+                    <div className="flex justify-between mt-4">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Notation : ~
+                      </a>
+
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : ~
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="parentRecom ml-[5vw] gap-x-[10vw]">
+            <div className="div1Recom">
+              {usersGroup1.map((user, index) => (
+                <div key={index}>
+                  <div
+                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
+                    onClick={() => setIdUser(user.id)}
+                  >
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+
+                    <h2 className="mt-2 text-xl font-semibold md:mt-0">
+                      {user.name}
+                    </h2>
+
+                    <div className="flex justify-center items-center mt-4 z-20">
                       {user.admin == "0" ? (
                         <button
-                          onClick={(e) =>{
+                          onClick={(e) => {
                             e.stopPropagation();
-                            updateUserTrigger(user.id, "1", user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineAdminPanelSettings size={30} style={{ color: "green" }} />
+                            updateUserTrigger(user.id, "1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineAdminPanelSettings
+                            size={30}
+                            style={{ color: "green" }}
+                          />
                         </button>
                       ) : (
                         <button
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          updateUserTrigger(user.id, "-1", user.name)}
-                        }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineRemoveModerator size={30} style={{ color: "red" }} />
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateUserTrigger(user.id, "-1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineRemoveModerator
+                            size={30}
+                            style={{ color: "red" }}
+                          />
                         </button>
                       )}
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            sendMailUserTrigger(user.email, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <IoMailOutline size={30} style={{ color: "blue" }} />
-                        </button>
-      
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            deleteUserTrigger(user.id, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <GoTrash size={30} style={{ color: "red" }} />
-                        </button>
-                      </div>
-        
-                      <div className="flex justify-between mt-4">
-                        <a href="#" className="text-lg font-medium" role="link">
-                            Notation : {user.notation}
-                        </a>
-      
-                        <a href="#" className="text-lg font-medium" role="link">
-                            Points : {user.points}
-                        </a>
-                      </div>
-      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendMailUserTrigger(user.email, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <IoMailOutline size={30} style={{ color: "blue" }} />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteUserTrigger(user.id, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <GoTrash size={30} style={{ color: "red" }} />
+                      </button>
+                    </div>
+
+                    <div className="flex justify-between mt-4">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Notation : {user.notation}
+                      </a>
+
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : {user.points}
+                      </a>
                     </div>
                   </div>
-                ))}
-              </div>
-      
-              <div className="div2Recom">
+                </div>
+              ))}
+            </div>
+
+            <div className="div2Recom">
               {usersGroup2.map((user, index) => (
-                  <div key={index}>
-                    <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
-                      onClick={() => setIdUser(user.id)}
-                    >
-                      <div className="flex justify-center -mt-16 md:justify-end">
-                        <Image
-                          className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                          alt="Testimonial avatar"
-                          src="/male-avatar.jpeg"
-                          width={100}
-                          height={100}
-                        />
-                      </div>
-        
-                      <h2 className="mt-2 text-xl font-semibold md:mt-0">
-                        {user.name}
-                      </h2>
-      
-                      <div className="flex justify-center items-center mt-4 z-20">
+                <div key={index}>
+                  <div
+                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
+                    onClick={() => setIdUser(user.id)}
+                  >
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+
+                    <h2 className="mt-2 text-xl font-semibold md:mt-0">
+                      {user.name}
+                    </h2>
+
+                    <div className="flex justify-center items-center mt-4 z-20">
                       {user.admin == "0" ? (
                         <button
-                          onClick={(e) =>{
+                          onClick={(e) => {
                             e.stopPropagation();
-                            updateUserTrigger(user.id, "1", user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineAdminPanelSettings size={30} style={{ color: "green" }} />
+                            updateUserTrigger(user.id, "1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineAdminPanelSettings
+                            size={30}
+                            style={{ color: "green" }}
+                          />
                         </button>
                       ) : (
                         <button
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          updateUserTrigger(user.id, "-1", user.name)}
-                        }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineRemoveModerator size={30} style={{ color: "red" }} />
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateUserTrigger(user.id, "-1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineRemoveModerator
+                            size={30}
+                            style={{ color: "red" }}
+                          />
                         </button>
                       )}
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            sendMailUserTrigger(user.email, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <IoMailOutline size={30} style={{ color: "blue" }} />
-                        </button>
-      
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            deleteUserTrigger(user.id, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <GoTrash size={30} style={{ color: "red" }} />
-                        </button>
-                      </div>
-        
-                      <div className="flex justify-between mt-4">
-                        <a href="#" className="text-lg font-medium" role="link">
-                            Notation : {user.notation}
-                        </a>
-      
-                        <a href="#" className="text-lg font-medium" role="link">
-                            Points : {user.points}
-                        </a>
-                      </div>
-      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendMailUserTrigger(user.email, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <IoMailOutline size={30} style={{ color: "blue" }} />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteUserTrigger(user.id, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-6 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <GoTrash size={30} style={{ color: "red" }} />
+                      </button>
+                    </div>
+
+                    <div className="flex justify-between mt-4">
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Notation : {user.notation}
+                      </a>
+
+                      <a href="#" className="text-lg font-medium" role="link">
+                        Points : {user.points}
+                      </a>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-            )}
+          </div>
+        )}
 
-      <br />
-      <br />
-      <br />
+        <br />
+        <br />
+        <br />
 
-      {popupOpenAdmin ? (
+        {popupOpenAdmin ? (
           <>
             <div
               className="fixed inset-0 z-10 overflow-y-auto"
@@ -434,7 +476,7 @@ const Accounts = () => {
                 >
                   &#8203;
                 </span>
-  
+
                 <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
@@ -456,7 +498,7 @@ const Accounts = () => {
                       >
                         Non
                       </button>
-  
+
                       <button
                         type="button"
                         onClick={() => {
@@ -474,7 +516,7 @@ const Accounts = () => {
           </>
         ) : null}
 
-      {popupOpenMail ? (
+        {popupOpenMail ? (
           <>
             <div
               className="fixed inset-0 z-10 overflow-y-auto"
@@ -489,7 +531,7 @@ const Accounts = () => {
                 >
                   &#8203;
                 </span>
-  
+
                 <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
@@ -510,18 +552,18 @@ const Accounts = () => {
                         className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
                       />
                     </label>
-  
+
                     <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
                       <button
                         type="button"
                         onClick={() => {
-                          sendMailUserTrigger("","");
+                          sendMailUserTrigger("", "");
                         }}
                         className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
                       >
                         Retour
                       </button>
-  
+
                       <button
                         type="button"
                         onClick={() => {
@@ -539,7 +581,7 @@ const Accounts = () => {
           </>
         ) : null}
 
-      {popupOpenDelete ? (
+        {popupOpenDelete ? (
           <>
             <div
               className="fixed inset-0 z-10 overflow-y-auto"
@@ -554,7 +596,7 @@ const Accounts = () => {
                 >
                   &#8203;
                 </span>
-  
+
                 <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
@@ -570,13 +612,13 @@ const Accounts = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          deleteUserTrigger("","");
+                          deleteUserTrigger("", "");
                         }}
                         className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
                       >
                         Non
                       </button>
-  
+
                       <button
                         type="button"
                         onClick={() => {
@@ -593,36 +635,34 @@ const Accounts = () => {
             </div>
           </>
         ) : null}
-        
-    </section>
+      </section>
     );
-  }
-  else{
+  } else {
     return (
       <section>
-      {/* #region blue spots */}
-      <div
-        className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
-        aria-hidden="true"
-      >
-        <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
-      </div>
-      <div
-        className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
-        aria-hidden="true"
-      >
+        {/* #region blue spots */}
         <div
-          className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-          style={{
-            clipPath:
-              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
-          }}
-        />
-      </div>
-      {/* #endregion */}
-      
-      <div className="ml-3">
-        <br />
+          className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
+          aria-hidden="true"
+        >
+          <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
+        </div>
+        <div
+          className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+          aria-hidden="true"
+        >
+          <div
+            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-dark-blue to-light-blue opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
+            style={{
+              clipPath:
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+            }}
+          />
+        </div>
+        {/* #endregion */}
+
+        <div className="ml-3">
+          <br />
           <div className="flex justify-between items-center">
             {/* Conteneur pour la barre de recherche et le bouton de filtre */}
             <div className="flex items-center">
@@ -635,247 +675,297 @@ const Accounts = () => {
               />
             </div>
           </div>
-      </div>
-      
-      {isLoading ? (
+        </div>
+
+        {isLoading ? (
           <div className="parentRecom flex w-full gap-x-[2vw]">
             <div className="div1Recom flex-grow w-[46vw] ml-[3vw]">
-                {[...Array(3)].map((_, index) => (
-                      <div key={index}>
-                    <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                          <div className="flex justify-center -mt-16 md:justify-end">
-                            <Image
-                              className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                              alt="Testimonial avatar"
-                              src="/male-avatar.jpeg"
-                              width={100}
-                              height={100}
-                            />
-                          </div>
-                          
-                          <br />
-                          <br />
-                          <br />
-                          <br />
+              {[...Array(3)].map((_, index) => (
+                <div key={index}>
+                  <div className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
 
-                          <div className=" mt-6">
-                            <div className="flex-1">
-                              <a href="#" className="text-base font-medium" role="link">
-                                Notation : ~
-                              </a>
-                            </div>
-                            <div className="flex-1">
-                              <a href="#" className="text-base font-medium" role="link">
-                                Points : ~
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                    <br />
+                    <br />
+                    <br />
+                    <br />
 
-                <div className="div2Recom flex-grow w-[46vw]">
-                    {[...Array(3)].map((_, index) => (
-                      <div key={index}>
-                        <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                          <div className="flex justify-center -mt-16 md:justify-end">
-                            <Image
-                              className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                              alt="Testimonial avatar"
-                              src="/male-avatar.jpeg"
-                              width={100}
-                              height={100}
-                            />
-                          </div>
-
-                          <br />
-                          <br />
-                          <br />
-                          <br />
-
-                          <div className=" mt-6">
-                            <div className="flex-1">
-                              <a href="#" className="text-base font-medium" role="link">
-                                Notation : ~
-                              </a>
-                            </div>
-                            <div className="flex-1">
-                              <a href="#" className="text-base font-medium" role="link">
-                                Points : ~
-                              </a>
-                            </div>
-                          </div>
-                        </div>
+                    <div className=" mt-6">
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Notation : ~
+                        </a>
                       </div>
-                      ))}
-                </div>
-            </div>
-            ) : (
-            <div className="parentRecom flex w-full gap-x-[2vw]">
-              <div className="div1Recom flex-grow w-[46vw] ml-[3vw]">
-                {usersGroup1.map((user, index) => (
-                  <div key={index}>
-                    <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
-                      onClick={() => setIdUser(user.id)}
-                    >
-                      <div className="flex justify-center -mt-16 md:justify-end">
-                        <Image
-                          className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                          alt="Testimonial avatar"
-                          src="/male-avatar.jpeg"
-                          width={100}
-                          height={100}
-                        />
-                      </div>
-        
-                      <h2 className="mt-2 text-base font-semibold md:mt-0">
-                        {user.name}
-                      </h2>
-      
-                      <div className="flex justify-center items-center mt-4 z-20">
-                      {user.admin == "0" ? (
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            updateUserTrigger(user.id, "1", user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineAdminPanelSettings size={30} style={{ color: "green" }} />
-                        </button>
-                      ) : (
-                        <button
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          updateUserTrigger(user.id, "-1", user.name)}
-                        }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineRemoveModerator size={30} style={{ color: "red" }} />
-                        </button>
-                      )}
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            sendMailUserTrigger(user.email, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <IoMailOutline size={30} style={{ color: "blue" }} />
-                        </button>
-      
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            deleteUserTrigger(user.id, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <GoTrash size={30} style={{ color: "red" }} />
-                        </button>
-                      </div>
-        
-                      <div className=" mt-6">
-                        <div className="flex-1">
-                          <a href="#" className="text-base font-medium" role="link">
-                            Notation : {user.notation}
-                          </a>
-                        </div>
-                        <div className="flex-1">
-                          <a href="#" className="text-base font-medium" role="link">
-                            Points : {user.points}
-                          </a>
-                        </div>
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Points : ~
+                        </a>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-        
-              <div className="div2Recom flex-grow w-[46vw]">
+                </div>
+              ))}
+            </div>
+
+            <div className="div2Recom flex-grow w-[46vw]">
+              {[...Array(3)].map((_, index) => (
+                <div key={index}>
+                  <div className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+
+                    <br />
+                    <br />
+                    <br />
+                    <br />
+
+                    <div className=" mt-6">
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Notation : ~
+                        </a>
+                      </div>
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Points : ~
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="parentRecom flex w-full gap-x-[2vw]">
+            <div className="div1Recom flex-grow w-[46vw] ml-[3vw]">
+              {usersGroup1.map((user, index) => (
+                <div key={index}>
+                  <div
+                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
+                    onClick={() => setIdUser(user.id)}
+                  >
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+
+                    <h2 className="mt-2 text-base font-semibold md:mt-0">
+                      {user.name}
+                    </h2>
+
+                    <div className="flex justify-center items-center mt-4 z-20">
+                      {user.admin == "0" ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateUserTrigger(user.id, "1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineAdminPanelSettings
+                            size={30}
+                            style={{ color: "green" }}
+                          />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateUserTrigger(user.id, "-1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineRemoveModerator
+                            size={30}
+                            style={{ color: "red" }}
+                          />
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendMailUserTrigger(user.email, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <IoMailOutline size={30} style={{ color: "blue" }} />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteUserTrigger(user.id, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <GoTrash size={30} style={{ color: "red" }} />
+                      </button>
+                    </div>
+
+                    <div className=" mt-6">
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Notation : {user.notation}
+                        </a>
+                      </div>
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Points : {user.points}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="div2Recom flex-grow w-[46vw]">
               {usersGroup2.map((user, index) => (
-                  <div key={index}>
-                    <div
-                      className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
-                      onClick={() => setIdUser(user.id)}
-                    >
-                      <div className="flex justify-center -mt-16 md:justify-end">
-                        <Image
-                          className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                          alt="Testimonial avatar"
-                          src="/male-avatar.jpeg"
-                          width={100}
-                          height={100}
-                        />
-                      </div>
-        
-                      <h2 className="mt-2 text-base font-semibold md:mt-0">
-                        {user.name}
-                      </h2>
-      
-                      <div className="flex justify-center items-center mt-4 z-20">
+                <div key={index}>
+                  <div
+                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full px-8 py-4 mt-16 bg-white rounded-lg shadow-lg z-10"
+                    onClick={() => setIdUser(user.id)}
+                  >
+                    <div className="flex justify-center -mt-16 md:justify-end">
+                      <Image
+                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                        alt="Testimonial avatar"
+                        src="/male-avatar.jpeg"
+                        width={100}
+                        height={100}
+                      />
+                    </div>
+
+                    <h2 className="mt-2 text-base font-semibold md:mt-0">
+                      {user.name}
+                    </h2>
+
+                    <div className="flex justify-center items-center mt-4 z-20">
                       {user.admin == "0" ? (
                         <button
-                          onClick={(e) =>{
+                          onClick={(e) => {
                             e.stopPropagation();
-                            updateUserTrigger(user.id, "1", user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineAdminPanelSettings size={30} style={{ color: "green" }} />
+                            updateUserTrigger(user.id, "1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineAdminPanelSettings
+                            size={30}
+                            style={{ color: "green" }}
+                          />
                         </button>
                       ) : (
                         <button
-                        onClick={(e) =>{
-                          e.stopPropagation();
-                          updateUserTrigger(user.id, "-1", user.name)}
-                        }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <MdOutlineRemoveModerator size={30} style={{ color: "red" }} />
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateUserTrigger(user.id, "-1", user.name);
+                          }}
+                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                        >
+                          <MdOutlineRemoveModerator
+                            size={30}
+                            style={{ color: "red" }}
+                          />
                         </button>
                       )}
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            sendMailUserTrigger(user.email, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <IoMailOutline size={30} style={{ color: "blue" }} />
-                        </button>
-      
-                        <button
-                          onClick={(e) =>{
-                            e.stopPropagation();
-                            deleteUserTrigger(user.id, user.name)}
-                          }
-                          className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none">
-                          <GoTrash size={30} style={{ color: "red" }} />
-                        </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendMailUserTrigger(user.email, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <IoMailOutline size={30} style={{ color: "blue" }} />
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteUserTrigger(user.id, user.name);
+                        }}
+                        className="hover:bg-light-blue flex items-center px-2 py-2 tracking-wide text-black capitalize transition-transform duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                      >
+                        <GoTrash size={30} style={{ color: "red" }} />
+                      </button>
+                    </div>
+
+                    <div className=" mt-6">
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Notation : {user.notation}
+                        </a>
                       </div>
-        
-                      <div className=" mt-6">
-                        <div className="flex-1">
-                          <a href="#" className="text-base font-medium" role="link">
-                            Notation : {user.notation}
-                          </a>
-                        </div>
-                        <div className="flex-1">
-                          <a href="#" className="text-base font-medium" role="link">
-                            Points : {user.points}
-                          </a>
-                        </div>
+                      <div className="flex-1">
+                        <a
+                          href="#"
+                          className="text-base font-medium"
+                          role="link"
+                        >
+                          Points : {user.points}
+                        </a>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-            )}
+          </div>
+        )}
 
-      <br />
-      <br />
-      <br />
-      
-      {popupOpenAdmin ? (
+        <br />
+        <br />
+        <br />
+
+        {popupOpenAdmin ? (
           <>
             <div
               className="fixed inset-0 z-10 overflow-y-auto"
@@ -890,7 +980,7 @@ const Accounts = () => {
                 >
                   &#8203;
                 </span>
-  
+
                 <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
@@ -912,7 +1002,7 @@ const Accounts = () => {
                       >
                         Non
                       </button>
-  
+
                       <button
                         type="button"
                         onClick={() => {
@@ -930,7 +1020,7 @@ const Accounts = () => {
           </>
         ) : null}
 
-      {popupOpenMail ? (
+        {popupOpenMail ? (
           <>
             <div
               className="fixed inset-0 z-10 overflow-y-auto"
@@ -945,7 +1035,7 @@ const Accounts = () => {
                 >
                   &#8203;
                 </span>
-  
+
                 <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
@@ -966,18 +1056,18 @@ const Accounts = () => {
                         className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-md focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-300 focus:ring-opacity-40 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 dark:focus:border-blue-300"
                       />
                     </label>
-  
+
                     <div className="mt-4 sm:flex sm:items-center sm:-mx-2">
                       <button
                         type="button"
                         onClick={() => {
-                          sendMailUserTrigger("","");
+                          sendMailUserTrigger("", "");
                         }}
                         className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
                       >
                         Retour
                       </button>
-  
+
                       <button
                         type="button"
                         onClick={() => {
@@ -995,7 +1085,7 @@ const Accounts = () => {
           </>
         ) : null}
 
-      {popupOpenDelete ? (
+        {popupOpenDelete ? (
           <>
             <div
               className="fixed inset-0 z-10 overflow-y-auto"
@@ -1010,7 +1100,7 @@ const Accounts = () => {
                 >
                   &#8203;
                 </span>
-  
+
                 <div className="relative inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl dark:bg-gray-900 sm:my-8 sm:w-full sm:max-w-sm sm:p-6 sm:align-middle">
                   <h3
                     className="text-lg font-medium leading-6 text-gray-800 capitalize dark:text-white"
@@ -1026,13 +1116,13 @@ const Accounts = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          deleteUserTrigger("","");
+                          deleteUserTrigger("", "");
                         }}
                         className="w-full px-4 py-2 text-sm font-medium tracking-wide text-gray-700 capitalize transition-colors duration-300 transform border border-gray-200 rounded-md sm:w-1/2 sm:mx-2 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-40"
                       >
                         Non
                       </button>
-  
+
                       <button
                         type="button"
                         onClick={() => {
@@ -1049,7 +1139,7 @@ const Accounts = () => {
             </div>
           </>
         ) : null}
-    </section>
+      </section>
     );
   }
 };

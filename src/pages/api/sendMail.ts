@@ -4,20 +4,20 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  service: 'Outlook365',
-  auth: {
-    user: process.env.OUTLOOK_USER,
-    pass: process.env.OUTLOOK_PASS,
-  },
-});
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { mailReceiver, mailText } = req.body;
+    const { mailMail, mailPassword, mailReceiver, mailText } = req.body;
+
+    const transporter = nodemailer.createTransport({
+      service: 'Outlook365',
+      auth: {
+        user: mailMail,
+        pass: mailPassword,
+      },
+    });
 
     const mailOptions = {
-      from: process.env.OUTLOOK_USER,
+      from: mailMail,
       to: mailReceiver,
       subject: 'Test Email from Outlook',
       html: `<p>${mailText}</p><img src="https://i.imgur.com/chmYFrU.png" alt="Logo">`,

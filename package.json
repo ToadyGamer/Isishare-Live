@@ -31,6 +31,7 @@
     "dotenv": "^16.4.5",
     "heroicons": "^2.1.1",
     "lucide-react": "^0.343.0",
+    "multer": "^1.4.5-lts.1",
     "next": "14.0.4",
     "nodemailer": "^6.9.13",
     "pranay": "^1.0.0",

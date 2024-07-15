@@ -38,6 +38,48 @@ export default function Profile() {
   const [showAdd, setShowAdd] = useState(false);
   const [source, setSource] = useState<string>("");
   const [info, setInfo] = useState<string>("");
+  const [linkPicture, setLinkPicture] = useState<string>("");
+
+  const handleFileChange = async (e: any) => {
+    const selectedFile = e.target.files[0];
+  
+    if (selectedFile) {
+      // Vérifie si le fichier est une image en vérifiant le type MIME
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'];
+      if (!validImageTypes.includes(selectedFile.type)) {
+        alert("Selected file is not a valid image. Please select an image file (JPEG, PNG, GIF, SVG).");
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('profilePic', selectedFile);
+  
+      const userId = localStorage.getItem("idActualUser");
+      formData.append('userId', userId as any);
+  
+      try {
+        const res = await fetch(`${localStorage.getItem("api")}pictures`, {
+          method: 'POST',
+          body: formData,
+        });
+  
+        const data = await res.json();
+  
+        const updateRes = await fetch(`${localStorage.getItem("api")}users/change/${userId}/picture/${data.url}`, {
+          method: 'PUT',
+        });
+  
+        if (!updateRes.ok) {
+          throw new Error("Network response was not ok");
+        }
+  
+        window.location.reload();
+      } catch (error) {
+        console.error("Error uploading file or updating profile picture:", error);
+      }
+    }
+  };
+  
 
   useEffect(() => {
     setAdmin(localStorage.getItem("isAdmin") + "");
@@ -77,6 +119,7 @@ export default function Profile() {
           setName(data[0].name);
           setPoints(data[0].points);
           setNotation(data[0].notation);
+          setLinkPicture("/uploads/" + data[0].picture);
         })
         .catch((error) => {
           console.error("Error fetching user data:", error);
@@ -215,13 +258,32 @@ export default function Profile() {
       </div>
   ) : (
       <div className="ml-10 w-1/5 max-w-sm overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800 float-right mr-10 mt-[88px]">
-          <Image
-              className="object-cover object-center w-full"
-              src="/male-avatar.jpeg"
-              width={300}
-              height={300}
-              alt="avatar"
-          />
+
+      <div className="relative w-full group">
+        <Image
+            className="object-cover object-center w-full"
+            src={linkPicture}
+            width={300}
+            height={300}
+            alt="avatar"
+        />
+
+        {idTargetUser == idActualUser ? (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white">
+            <label className="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 opacity-75">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                </div>
+                <input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange}/>
+            </label>
+          </div>
+        ):null}
+      </div>
+
           <div className="items-center px-6 py-4 bg-dark-blue">
               <div className="flex justify-center w-full">
                   <h1 className="mx-3 text-lg font-semibold text-white">
@@ -298,7 +360,7 @@ export default function Profile() {
                       {ownUser || admin == "1" ? (
                           <button
                               onClick={() => deleteContactTrigger(contact.id)}
-                              className="flex items-center px-6 py-2 ml-4 tracking-wide text-black capitalize transition-scale duration-300 transform rounded-md hover:scale-110 focus:outline-none"
+                              className="tracking-wide text-black capitalize transition-scale duration-300 transform rounded-md hover:scale-110 focus:outline-none"
                           >
                               <GoTrash size={30} style={{ color: "red" }} />
                           </button>
@@ -464,13 +526,29 @@ export default function Profile() {
   ) : (
       <div>
         <div className="w-4/5 bg-white rounded-lg shadow-lg dark:bg-gray-800 mt-[20px] mx-auto relative">
-          <Image
+        <div className="relative w-full group">
+        <Image
             className="object-cover object-center w-full"
-            src="/male-avatar.jpeg"
+            src={linkPicture}
             width={300}
             height={300}
             alt="avatar"
-            />
+        />
+        {idTargetUser == idActualUser ? (
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white">
+            <label className="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 opacity-75">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                </div>
+                <input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange}/>
+            </label>
+          </div>
+        ):null}
+      </div>
           <div className="items-center px-6 py-4 bg-dark-blue">
             <div className="flex justify-center w-full">
               <h1 className="mx-3 text-lg font-semibold text-white">
