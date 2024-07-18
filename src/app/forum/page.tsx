@@ -22,11 +22,8 @@ export default function ForumPage() {
     return (
       <>
         <Sidebar />
-        <div className="containerForum">
-          <main className="mainForum">
-            <h1 className="titleForum text-2xl" id="title">Discute avec tout le monde !</h1>
-            <Chat />
-          </main>
+        <div className="ml-16">
+          <Chat />
         </div>
       </>
     );

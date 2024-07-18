@@ -58,7 +58,7 @@ export default function WTL() {
       });
   }, []);
 
-  //#region DELETE
+  //#region DELETE WTL
   const [showDelete, setShowDelete] = React.useState(false);
   const [idWTL, setIdWTL] = useState([]);
 
@@ -84,7 +84,7 @@ export default function WTL() {
   };
   //#endregion
 
-  //#region ADD
+  //#region ADD WTL
   const [showAdd, setShowAdd] = React.useState(false);
   const [interet, setInteret] = useState([]);
   const [description, setDescription] = useState([]);
@@ -115,7 +115,7 @@ export default function WTL() {
         console.error("Error fetching users:", error);
       });
   };
-  //#endregion
+  //#endregion 
 
   if(window.innerWidth > 500){
     return (
