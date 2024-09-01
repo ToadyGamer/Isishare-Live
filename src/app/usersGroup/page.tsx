@@ -2,9 +2,9 @@
 import { useState, useEffect } from "react";
 import NotConnect from "@/components/not-connect";
 import Sidebar from "@/components/Sidebar";
-import Recom from "@/components/Recommendation";
+import UsersGroup from "@/components/UsersGroup";
 
-export default function Recommendation() {
+export default function Home() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function Recommendation() {
     return (
       <>
         <Sidebar />
-        <Recom />
+        <UsersGroup />
       </>
     );
   }
