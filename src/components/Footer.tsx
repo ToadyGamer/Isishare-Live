@@ -15,35 +15,6 @@ export default function Footer() {
               alt=""
             />
           </a>
-
-          <div className="flex mt-4 md:m-0">
-            <div className="-mx-4">
-              <a
-                href="#"
-                className="px-4 text-sm text-gray-600 transition-colors duration-300 dark:text-gray-500 hover:text-black hover:underline"
-              >
-                About
-              </a>
-              <a
-                href="#"
-                className="px-4 text-sm text-gray-600 transition-colors duration-300 dark:text-gray-500 hover:text-black hover:underline"
-              >
-                Blog
-              </a>
-              <a
-                href="#"
-                className="px-4 text-sm text-gray-600 transition-colors duration-300 dark:text-gray-500 hover:text-black hover:underline"
-              >
-                News
-              </a>
-              <a
-                href="#"
-                className="px-4 text-sm text-gray-600 transition-colors duration-300 dark:text-gray-500 hover:text-black hover:underline"
-              >
-                Contact
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </footer>
