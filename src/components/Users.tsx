@@ -12,7 +12,6 @@ const Users = () => {
     description: string;
     points: string;
     notation: string;
-    picture: string;
   }
 
   interface KnowledgInfo {
@@ -31,9 +30,7 @@ const Users = () => {
     icon: string;
   }
 
-  const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<UserInfo[]>([]);
-  const [admin, setAdmin] = useState<string>("0");
   const [knowledges, setknowledges] = useState<KnowledgInfo[]>([]);
   const [goals, setGoals] = useState<GoalInfo[]>([]);
   const [interests, setInterests] = useState<InterestInfo[]>([]);
@@ -49,8 +46,6 @@ const Users = () => {
 
   // Recupere les datas via l'api
   useEffect(() => {
-    setAdmin(localStorage.getItem("isAdmin") + "");
-
     const fetchData = async () => {
       try {
         // Récupérer les utilisateurs
@@ -73,8 +68,6 @@ const Users = () => {
         const interestsResponse = await fetch(`${localStorage.getItem("api")}interests`);
         const interestsData = await interestsResponse.json();
         setInterests(interestsData);
-
-        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -96,6 +89,7 @@ const Users = () => {
     // Inverser la direction du tri
     setSortDirectionNom(sortDirectionNom === "asc" ? "desc" : "asc");
   };
+
   // Fonction pour trier la liste des utilisateurs en fonction du score des points
   const sortUsersByPoints = () => {
     const sortedUsers = [...users].sort((a: any, b: any) => {
@@ -108,6 +102,7 @@ const Users = () => {
     setUsers(sortedUsers);
     setSortDirectionPoints(sortDirectionPoints === "asc" ? "desc" : "asc"); // Inverse la direction du tri
   };
+
   // Fonction pour trier la liste des utilisateurs en fonction du score de note
   const sortUsersByNotation = () => {
     const sortedUsers = [...users].sort((a: any, b: any) => {
@@ -120,6 +115,7 @@ const Users = () => {
     setUsers(sortedUsers);
     setSortDirectionNotation(sortDirectionNotation === "asc" ? "desc" : "asc"); // Inverse la direction du tri
   };
+
   // Filtrer les utilisateurs par connaissance et objectifs sélectionnée
   const filteredUsers = users.filter((user) => {
     const userKnowledgeIds = knowledges
@@ -137,7 +133,7 @@ const Users = () => {
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  //Fonction pour gérer la sélection des filtres d'objectifs
+  //fonction pour gérer la sélection des filtres d'objectifs
   const handleGoalFilterSelection = (filter: string) => {
     if (selectedGoalFilters.includes(filter)) {
       setSelectedGoalFilters(selectedGoalFilters.filter((item) => item !== filter));
@@ -145,6 +141,11 @@ const Users = () => {
       setSelectedGoalFilters([...selectedGoalFilters, filter]);
     }
   };
+
+
+  const usersGroup1 = filteredUsers.filter((user, index) => index % 3 === 0);
+  const usersGroup2 = filteredUsers.filter((user, index) => index % 3 === 1);
+  const usersGroup3 = filteredUsers.filter((user, index) => index % 3 === 2);
 
   // Ouvre la popup
   const togglePopup = () => {
@@ -171,12 +172,9 @@ const Users = () => {
     window.location.href = "/profile";
   };
 
-  const usersGroup1 = filteredUsers.filter((user, index) => index % 3 === 0);
-  const usersGroup2 = filteredUsers.filter((user, index) => index % 3 === 1);
-  const usersGroup3 = filteredUsers.filter((user, index) => index % 3 === 2);
-
   return (
-    <section className="container px-4">
+    
+    <section className="container px-4 ml-14 mx-auto w-full">
       {/* #region blue spots */}
       <div
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -197,117 +195,116 @@ const Users = () => {
         />
       </div>
       {/* #endregion */}
-
-      <div className="ml-14">
-        <br />
-        <div className="flex justify-between items-center">
-        {/* Conteneur pour la barre de recherche et le bouton de filtre */}
-        <div className="flex items-center">
+      <div className="flex justify-between items-center mt-2 mb-4">
+        <div>
+          {/* Barre de recherche */}
           <input
             type="text"
             placeholder="Rechercher par nom..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input px-4 py-2 border border-gray-300 rounded-md"
+            className="ml-4 search-input"
           />
+          {/* Bouton pour ouvrir la popup de filtres */}
           <button
+            id="buttontogglePopup"
             onClick={togglePopup}
             className="px-4 py-2 bg-dark-blue text-white rounded-md ml-4"
           >
             <LuFilter />
           </button>
         </div>
-        {/* Conteneur pour les boutons de changement de vue */}
-          <div className="flex items-center">
-            <button
-              onClick={() => setView("kanban")}
-              className="px-4 py-2 bg-dark-blue text-white rounded-md mr-4"
-            >
-              <LuKanbanSquare />
-            </button>
-            <button
-              onClick={() => setView("tree")}
-              className="px-4 py-2 bg-dark-blue text-white rounded-md mr-8"
-            >
-              <TbListTree />
-            </button>
-          </div>
-        </div>
-        {popupOpen && (
-          <div className="fixed inset-0 flex items-center justify-center bg-light-gray-transparent bg-opacity-50">
-            <div className="bg-white p-8 rounded-lg w-[65vw] h-[40vw] overflow-auto">
-              <h2 className="text-xl text-dark-blue font-bold mb-4">Filtres</h2>
-              <div>
-                <h3 className="text-dark-blue font-bold mb-4">Connaissances</h3>
+
+        <div>
+          {/* Bouton pour afficher la vue Kanban */}
+          <button
+            onClick={() => setView("kanban")}
+            className="px-4 py-2 bg-dark-blue text-white rounded-md mr-4"
+          >
+            <LuKanbanSquare />
+          </button>
+
+          {/* Bouton pour afficher la vue Tree */}
+          <button
+            onClick={() => setView("tree")}
+            className="px-4 py-2 bg-dark-blue text-white rounded-md mr-8"
+          >
+            <TbListTree />
+          </button>
+
+          {popupOpen && (
+            <div className="overflow-auto fixed flex items-center justify-center inset-0 bg-light-gray-transparent bg-opacity-50">
+              <div className="bg-white p-8 rounded-lg">
+                <h2 className="text-xl text-dark-blue font-bold mb-4">Filtres</h2>
                 <div>
-                  {interests
-                    .filter((interest) => interest.name !== "Empty")
-                    .map((interest) => (
-                      <button
-                        key={interest.id}
-                        onClick={() => handleFilterSelection(interest.id)}
-                        className={`mr-2 mb-2 px-4 py-2 rounded ${
-                          selectedFilters.includes(interest.id)
+                  <h3 className="text-dark-blue font-bold mb-4">Connaissances</h3>
+                  <div>
+                    {interests
+                      .filter((interest) => interest.name !== "Empty")
+                      .map((interest) => (
+                        <button
+                          key={interest.id}
+                          onClick={() => handleFilterSelection(interest.id)}
+                          className={`mr-2 mb-2 px-4 py-2 rounded ${selectedFilters.includes(interest.id)
                             ? "bg-dark-blue text-white"
                             : "bg-gray-200 text-gray-800"
-                        }`}
-                      >
-                        <Image
-                          src={"/" + interest.icon}
-                          alt="Icone"
-                          width={20}
-                          height={20}
-                          className="icon"
-                        />
-                      </button>
-                    ))}
+                            }`}
+                        >
+                          <Image
+                            src={"/" + interest.icon}
+                            alt="Icone"
+                            width={20}
+                            height={20}
+                            className="icon"
+                          />
+                        </button>
+                      ))}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-dark-blue font-bold mb-4">Objectifs</h3>
                 <div>
-                  {interests
-                    .filter((interest) => interest.name !== "Empty")
-                    .map((interest) => (
-                      <button
-                        key={interest.id}
-                        onClick={() => handleGoalFilterSelection(interest.id)}
-                        className={`mr-2 mb-2 px-4 py-2 rounded ${
-                          selectedGoalFilters.includes(interest.id)
+                  <h3 className="text-dark-blue font-bold mb-4">Objectifs</h3>
+                  <div>
+                    {interests
+                      .filter((interest) => interest.name !== "Empty")
+                      .map((interest) => (
+                        <button
+                          key={interest.id}
+                          onClick={() => handleGoalFilterSelection(interest.id)}
+                          className={`mr-2 mb-2 px-4 py-2 rounded ${selectedGoalFilters.includes(interest.id)
                             ? "bg-dark-blue text-white"
                             : "bg-gray-200 text-gray-800"
-                        }`}
-                      >
-                        <Image
-                          src={"/" + interest.icon}
-                          alt="Icone"
-                          width={20}
-                          height={20}
-                          className="icon"
-                        />
-                      </button>
-                    ))}
+                            }`}
+                        >
+                          <Image
+                            src={"/" + interest.icon}
+                            alt="Icone"
+                            width={20}
+                            height={20}
+                            className="icon"
+                          />
+                        </button>
+                      ))}
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={closePopup}
-                  className="px-4 py-2 bg-dark-blue text-white rounded-md"
-                >
-                  Fermer
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    onClick={closePopup}
+                    className="px-4 py-2 bg-dark-blue text-white rounded-md"
+                  >
+                    Fermer
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      <br />
       {view === "tree" ? ( // view tree
-        <div className="flex flex-col mt-6 ml-14">
+        <div className="flex flex-col mt-6">
           <div className="-mx-4 -my-2 overflow-x-auto">
-            <div className="inline-block py-2 align-middle px-7 w-full">
-              <div className="overflow-x-auto border border-dark-gray md:rounded-lg">
-                <table className="min-w-full divide-y divide-dark-gray td-width">
+            <div className="inline-block py-2 align-middle md:px-6 lg:px-8 w-full">
+              <div className="overflow-hidden border border-dark-gray md:rounded-lg">
+                <table className="max-w-1xl divide-y divide-dark-gray td-width">
                   <thead className="bg-black">
                     <tr>
                       <th
@@ -596,394 +593,266 @@ const Users = () => {
         </div>
       ) : (
         // view kanban
-        <>
-        {isLoading ? (
-          <div className="parent ml-14">
-              <div className="div1">
-              {[...Array(3)].map((_, index) => (
-                    <div key={index}>
-                      <div
-                        className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                        <div className="flex justify-center -mt-16 md:justify-end">
+        <div className="parent">
+          <div className="div1">
+            {usersGroup1.map((user, index) => (
+              <div key={index}>
+                <div
+                  className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg"
+                  onClick={() => setIdUser(user.id)}
+                >
+                  <div className="flex justify-center -mt-16 md:justify-end">
+                    <Image
+                      className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                      alt="Testimonial avatar"
+                      src="/male-avatar.jpeg"
+                      width={100}
+                      height={100}
+                    />
+                  </div>
+
+                  <h2 className="mt-2 text-xl font-semibold md:mt-0">
+                    {user.name}
+                  </h2>
+
+                  <p className="mt-2 text-sm text-gray-600">
+                    Connaissances :
+                  </p>
+                  <div className="flex flex-wrap justify-center mt-2">
+                    {knowledges
+                      .filter(
+                        (knowledge) => knowledge.user_id === user.id
+                      )
+                      .reduce((uniqueInterests, knowledge) => {
+                        interests.forEach((interest) => {
+                          if (
+                            knowledge.interest_id === interest.id &&
+                            !uniqueInterests.includes(
+                              interest.id as never
+                            )
+                          ) {
+                            uniqueInterests.push(interest.id as never);
+                          }
+                        });
+                        return uniqueInterests;
+                      }, [])
+                      .map((uniqueInterestId) => (
+                        <div key={uniqueInterestId} className="mx-2">
                           <Image
-                            className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                            alt="Testimonial avatar"
-                            src="/male-avatar.jpeg"
-                            width={100}
-                            height={100}
+                            className="object-cover w-10 h-10"
+                            width={300}
+                            height={300}
+                            src={"/" +
+                              interests.find(
+                                (interest) =>
+                                  interest.id === uniqueInterestId
+                              )?.icon || "Logo/Empty.png"
+                            }
+                            alt="logo"
                           />
                         </div>
-
-                        <p className="mt-2 text-sm text-gray-600">
-                          Connaissances :
-                        </p>
-                        <div className="flex flex-wrap justify-center mt-2">
-
-                        </div>
-                        <div className="flex justify-between mt-6">
-                          <div className="flex-1 text-right">
-                            <a href="#" className="text-lg font-medium" role="link">
-                              Points : ~
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-
-              <div className="div2">
-                  {[...Array(3)].map((_, index) => (
-                    <div key={index}>
-                      <div
-                        className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                        <div className="flex justify-center -mt-16 md:justify-end">
+                      ))}
+                    {/* Si aucun logo de connaissance n'est trouvé, affichez le logo correspondant à empty */}
+                    {knowledges.filter(
+                      (knowledge) => knowledge.user_id === user.id
+                    ).length === 0 && (
+                        <div className="mx-2">
                           <Image
-                            className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                            alt="Testimonial avatar"
-                            src="/male-avatar.jpeg"
-                            width={100}
-                            height={100}
+                            className="object-cover w-10 h-10"
+                            width={300}
+                            height={300}
+                            src={"/Logo/Empty.png"
+                            }
+                            alt="logo"
                           />
                         </div>
+                      )}
+                  </div>
 
-                        <p className="mt-2 text-sm text-gray-600">
-                          Connaissances :
-                        </p>
-                        <div className="flex flex-wrap justify-center mt-2">
-
-                        </div>
-                        <div className="flex justify-between mt-6">
-                          <div className="flex-1 text-right">
-                            <a href="#" className="text-lg font-medium" role="link">
-                              Points : ~
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    ))}
+                  <div className="flex justify-end mt-4">
+                    <a href="#" className="text-lg font-medium" role="link">
+                      Points : {user.points}
+                    </a>
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
 
-              <div className="div3">
-                {[...Array(3)].map((_, index) => (
-                      <div key={index}>
-                        <div
-                          className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg">
-                          <div className="flex justify-center -mt-16 md:justify-end">
-                            <Image
-                              className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                              alt="Testimonial avatar"
-                              src="/male-avatar.jpeg"
-                              width={100}
-                              height={100}
-                            />
-                          </div>
+          <div className="div2">
+            {usersGroup2.map((user, index) => (
+              <div key={index}>
+                <div
+                  className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg"
+                  onClick={() => setIdUser(user.id)}
+                >
+                  <div className="flex justify-center -mt-16 md:justify-end">
+                    <Image
+                      className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                      alt="Testimonial avatar"
+                      src="/male-avatar.jpeg"
+                      width={100}
+                      height={100}
+                    />
+                  </div>
 
-                          <p className="mt-2 text-sm text-gray-600">
-                            Connaissances :
-                          </p>
-                          <div className="flex flex-wrap justify-center mt-2">
+                  <h2 className="mt-2 text-xl font-semibold md:mt-0">
+                    {user.name}
+                  </h2>
 
-                          </div>
-                          <div className="flex justify-between mt-6">
-                            <div className="flex-1 text-right">
-                              <a href="#" className="text-lg font-medium" role="link">
-                                Points : ~
-                              </a>
-                            </div>
-                          </div>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Connaissances :
+                  </p>
+                  <div className="flex flex-wrap justify-center mt-2">
+                    {knowledges
+                      .filter(
+                        (knowledge) => knowledge.user_id === user.id
+                      )
+                      .reduce((uniqueInterests, knowledge) => {
+                        interests.forEach((interest) => {
+                          if (
+                            knowledge.interest_id === interest.id &&
+                            !uniqueInterests.includes(
+                              interest.id as never
+                            )
+                          ) {
+                            uniqueInterests.push(interest.id as never);
+                          }
+                        });
+                        return uniqueInterests;
+                      }, [])
+                      .map((uniqueInterestId) => (
+                        <div key={uniqueInterestId} className="mx-2">
+                          <Image
+                            className="object-cover w-10 h-10"
+                            width={300}
+                            height={300}
+                            src={"/" +
+                              interests.find(
+                                (interest) =>
+                                  interest.id === uniqueInterestId
+                              )?.icon || "Logo/Empty.png"
+                            }
+                            alt="logo"
+                          />
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    {/* Si aucun logo de connaissance n'est trouvé, affichez le logo correspondant à empty */}
+                    {knowledges.filter(
+                      (knowledge) => knowledge.user_id === user.id
+                    ).length === 0 && (
+                        <div className="mx-2">
+                          <Image
+                            className="object-cover w-10 h-10"
+                            width={300}
+                            height={300}
+                            src={"/Logo/Empty.png"
+                            }
+                            alt="logo"
+                          />
+                        </div>
+                      )}
+                  </div>
+
+                  <div className="flex justify-end mt-4">
+                    <a href="#" className="text-lg font-medium" role="link">
+                      Points : {user.points}
+                    </a>
+                  </div>
+                </div>
               </div>
+            ))}
           </div>
-          ) : (
-            <div className="parent ml-14">
-            <div className="div1">
-              {usersGroup1.map((user, index) => (
-                <div key={index}>
-                  <div
-                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg"
-                    onClick={() => setIdUser(user.id)}
-                  >
-                    <div className="flex justify-center -mt-16 md:justify-end">
-                      <Image
-                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                        alt="Testimonial avatar"
-                        src={user.picture ? user.picture : "/male-avatar.jpeg"}
-                        width={100}
-                        height={100}
-                      />
-                    </div>
 
-                    <h2 className="mt-2 text-xl font-semibold md:mt-0">
-                      {user.name}
-                    </h2>
+          <div className="div3">
+            {usersGroup3.map((user, index) => (
+              <div key={index}>
+                <div
+                  className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg"
+                  onClick={() => setIdUser(user.id)}
+                >
+                  <div className="flex justify-center -mt-16 md:justify-end">
+                    <Image
+                      className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
+                      alt="Testimonial avatar"
+                      src="/male-avatar.jpeg"
+                      width={100}
+                      height={100}
+                    />
+                  </div>
 
-                    <p className="mt-2 text-sm text-gray-600">
-                      Connaissances :
-                    </p>
-                    <div className="flex flex-wrap justify-center mt-2">
-                      {knowledges
-                        .filter(
-                          (knowledge) => knowledge.user_id === user.id
-                        )
-                        .reduce((uniqueInterests, knowledge) => {
-                          interests.forEach((interest) => {
-                            if (
-                              knowledge.interest_id === interest.id &&
-                              !uniqueInterests.includes(
-                                interest.id as never
-                              )
-                            ) {
-                              uniqueInterests.push(interest.id as never);
-                            }
-                          });
-                          return uniqueInterests;
-                        }, [])
-                        .map((uniqueInterestId) => (
-                          <div key={uniqueInterestId} className="mx-2">
-                            <Image
-                              className="object-cover w-10 h-10"
-                              width={300}
-                              height={300}
-                              src={"/" +
-                                interests.find(
-                                  (interest) =>
-                                    interest.id === uniqueInterestId
-                                )?.icon || "Logo/Empty.png"
-                              }
-                              alt="logo"
-                            />
-                          </div>
-                        ))}
-                      {/* Si aucun logo de connaissance n'est trouvé, affichez le logo correspondant à empty */}
-                      {knowledges.filter(
+                  <h2 className="mt-2 text-xl font-semibold md:mt-0">
+                    {user.name}
+                  </h2>
+
+                  <p className="mt-2 text-sm text-gray-600">
+                    Connaissances :
+                  </p>
+                  <div className="flex flex-wrap justify-center mt-2">
+                    {knowledges
+                      .filter(
                         (knowledge) => knowledge.user_id === user.id
-                      ).length === 0 && (
-                          <div className="mx-2">
-                            <Image
-                              className="object-cover w-10 h-10"
-                              width={300}
-                              height={300}
-                              src={"/Logo/Empty.png"
-                              }
-                              alt="logo"
-                            />
-                          </div>
-                        )}
-                    </div>
-                    <div className="flex justify-between mt-6">
-                      {admin == "1" ? (
-                        <div className="flex-1">
-                          <a href="#" className="text-lg font-medium" role="link">
-                            Notation : {user.notation}
-                          </a>
+                      )
+                      .reduce((uniqueInterests, knowledge) => {
+                        interests.forEach((interest) => {
+                          if (
+                            knowledge.interest_id === interest.id &&
+                            !uniqueInterests.includes(
+                              interest.id as never
+                            )
+                          ) {
+                            uniqueInterests.push(interest.id as never);
+                          }
+                        });
+                        return uniqueInterests;
+                      }, [])
+                      .map((uniqueInterestId) => (
+                        <div key={uniqueInterestId} className="mx-2">
+                          <Image
+                            className="object-cover w-10 h-10"
+                            width={300}
+                            height={300}
+                            src={"/" +
+                              interests.find(
+                                (interest) =>
+                                  interest.id === uniqueInterestId
+                              )?.icon || "Logo/Empty.png"
+                            }
+                            alt="logo"
+                          />
                         </div>
-                      ) : null}
-                      <div className="flex-1 text-right">
-                        <a href="#" className="text-lg font-medium" role="link">
-                          Points : {user.points}
-                        </a>
-                      </div>
-                    </div>
+                      ))}
+                    {/* Si aucun logo de connaissance n'est trouvé, affichez le logo correspondant à empty */}
+                    {knowledges.filter(
+                      (knowledge) => knowledge.user_id === user.id
+                    ).length === 0 && (
+                        <div className="mx-2">
+                          <Image
+                            className="object-cover w-10 h-10"
+                            width={300}
+                            height={300}
+                            src={"/Logo/Empty.png"
+                            }
+                            alt="logo"
+                          />
+                        </div>
+                      )}
+                  </div>
+
+                  <div className="flex justify-end mt-4">
+                    <a href="#" className="text-lg font-medium" role="link">
+                      Points : {user.points}
+                    </a>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="div2">
-              {usersGroup2.map((user, index) => (
-                <div key={index}>
-                  <div
-                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg"
-                    onClick={() => setIdUser(user.id)}
-                  >
-                    <div className="flex justify-center -mt-16 md:justify-end">
-                      <Image
-                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                        alt="Testimonial avatar"
-                        src={user.picture ? user.picture : "/male-avatar.jpeg"}
-                        width={100}
-                        height={100}
-                      />
-                    </div>
-
-                    <h2 className="mt-2 text-xl font-semibold md:mt-0">
-                      {user.name}
-                    </h2>
-
-                    <p className="mt-2 text-sm text-gray-600">
-                      Connaissances :
-                    </p>
-                    <div className="flex flex-wrap justify-center mt-2">
-                      {knowledges
-                        .filter(
-                          (knowledge) => knowledge.user_id === user.id
-                        )
-                        .reduce((uniqueInterests, knowledge) => {
-                          interests.forEach((interest) => {
-                            if (
-                              knowledge.interest_id === interest.id &&
-                              !uniqueInterests.includes(
-                                interest.id as never
-                              )
-                            ) {
-                              uniqueInterests.push(interest.id as never);
-                            }
-                          });
-                          return uniqueInterests;
-                        }, [])
-                        .map((uniqueInterestId) => (
-                          <div key={uniqueInterestId} className="mx-2">
-                            <Image
-                              className="object-cover w-10 h-10"
-                              width={300}
-                              height={300}
-                              src={"/" +
-                                interests.find(
-                                  (interest) =>
-                                    interest.id === uniqueInterestId
-                                )?.icon || "Logo/Empty.png"
-                              }
-                              alt="logo"
-                            />
-                          </div>
-                        ))}
-                      {/* Si aucun logo de connaissance n'est trouvé, affichez le logo correspondant à empty */}
-                      {knowledges.filter(
-                        (knowledge) => knowledge.user_id === user.id
-                      ).length === 0 && (
-                          <div className="mx-2">
-                            <Image
-                              className="object-cover w-10 h-10"
-                              width={300}
-                              height={300}
-                              src={"/Logo/Empty.png"
-                              }
-                              alt="logo"
-                            />
-                          </div>
-                        )}
-                    </div>
-                    <div className="flex justify-between mt-6">
-                      {admin == "1" ? (
-                        <div className="flex-1">
-                          <a href="#" className="text-lg font-medium" role="link">
-                            Notation : {user.notation}
-                          </a>
-                        </div>
-                      ) : null}
-                      <div className="flex-1 text-right">
-                        <a href="#" className="text-lg font-medium" role="link">
-                          Points : {user.points}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="div3">
-              {usersGroup3.map((user, index) => (
-                <div key={index}>
-                  <div
-                    className="hover:bg-light-blue-transparent hover:text-white cursor-pointer transition duration-300 w-full max-w-md px-8 py-4 mt-16 bg-white rounded-lg shadow-lg"
-                    onClick={() => setIdUser(user.id)}
-                  >
-                    <div className="flex justify-center -mt-16 md:justify-end">
-                      <Image
-                        className="object-cover w-20 h-20 border-2 border-blue-500 rounded-full"
-                        alt="Testimonial avatar"
-                        src={user.picture ? user.picture : "/male-avatar.jpeg"}
-                        width={100}
-                        height={100}
-                      />
-                    </div>
-
-                    <h2 className="mt-2 text-xl font-semibold md:mt-0">
-                      {user.name}
-                    </h2>
-
-                    <p className="mt-2 text-sm text-gray-600">
-                      Connaissances :
-                    </p>
-                    <div className="flex flex-wrap justify-center mt-2">
-                      {knowledges
-                        .filter(
-                          (knowledge) => knowledge.user_id === user.id
-                        )
-                        .reduce((uniqueInterests, knowledge) => {
-                          interests.forEach((interest) => {
-                            if (
-                              knowledge.interest_id === interest.id &&
-                              !uniqueInterests.includes(
-                                interest.id as never
-                              )
-                            ) {
-                              uniqueInterests.push(interest.id as never);
-                            }
-                          });
-                          return uniqueInterests;
-                        }, [])
-                        .map((uniqueInterestId) => (
-                          <div key={uniqueInterestId} className="mx-2">
-                            <Image
-                              className="object-cover w-10 h-10"
-                              width={300}
-                              height={300}
-                              src={"/" +
-                                interests.find(
-                                  (interest) =>
-                                    interest.id === uniqueInterestId
-                                )?.icon || "Logo/Empty.png"
-                              }
-                              alt="logo"
-                            />
-                          </div>
-                        ))}
-                      {/* Si aucun logo de connaissance n'est trouvé, affichez le logo correspondant à empty */}
-                      {knowledges.filter(
-                        (knowledge) => knowledge.user_id === user.id
-                      ).length === 0 && (
-                          <div className="mx-2">
-                            <Image
-                              className="object-cover w-10 h-10"
-                              width={300}
-                              height={300}
-                              src={"/Logo/Empty.png"
-                              }
-                              alt="logo"
-                            />
-                          </div>
-                        )}
-                    </div>
-                    <div className="flex justify-between mt-6">
-                      {admin == "1" ? (
-                        <div className="flex-1">
-                          <a href="#" className="text-lg font-medium" role="link">
-                            Notation : {user.notation}
-                          </a>
-                        </div>
-                      ) : null}
-                      <div className="flex-1 text-right">
-                        <a href="#" className="text-lg font-medium" role="link">
-                          Points : {user.points}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-          )}
-        </>
+        </div>
+
       )}
     </section>
   );
-}
+};
 
 export default Users;

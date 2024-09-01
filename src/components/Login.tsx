@@ -1,16 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-const hash = require("object-hash");
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import Users from "./Recommendation";
 
 export default function Login() {
   interface UserInfo {
     id: string;
     email: string;
     password: string;
-    admin: string;
   }
 
   const [idUser, setIdUser] = useState<string>("");
@@ -38,33 +35,24 @@ export default function Login() {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-
-    const hashedPassword = hash(password);
-
     let userFind = false;
     for (let i = 0; i < infoLogin.length; i++) {
-      if (
-        infoLogin[i].email == email &&
-        infoLogin[i].password == hashedPassword
-      ) {
+      if (infoLogin[i].email == email && infoLogin[i].password == password) {
         document.location.href = "/home";
         setIdUser(infoLogin[i].id);
         localStorage.setItem("idActualUser", infoLogin[i].id.toString());
-        localStorage.setItem("isAdmin", infoLogin[i].admin.toString());
         userFind = true;
       }
     }
 
-    if (!userFind) {
-      toast.error("Email ou mot de passe incorrect");
-    }
+    if(!userFind)alert("Email ou mot de passe incorrect");
   };
 
   return (
     <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-lg">
         <a href="/">
-          <Image
+        <Image
             className="w-full max-w-lg lg:mx-auto"
             src="/isishare.png"
             width={300}
@@ -161,7 +149,6 @@ export default function Login() {
           </p>
         </form>
         <h2 className="color-red"></h2>
-        <ToastContainer />
       </div>
     </div>
   );

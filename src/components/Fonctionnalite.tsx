@@ -13,7 +13,9 @@ export default function Fonctionnalite() {
         <div className="gap-16 items-center py-8 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6">
           <div className="font-light text-black sm:text-lg">
             <p className="mb-4">
-              Isishare est une application innovante qui permet de partager et d&apos;acquérir des compétences en connectant les utilisateurs entre eux. Grâce à Isishare, vous pouvez rejoindre des groupes d&apos;apprentissage sur des sujets qui vous passionnent, entrer en contact avec des personnes partageant les mêmes intérêts, et échanger directement avec elles pour élargir vos connaissances. L&apos;application facilite les connexions et les échanges de compétences pour un apprentissage collaboratif et enrichissant.
+              Fonctionalité Lorem ipsum dolor sit amet consectetur adipisicing
+              elit. Quisquam eius accusantium alias accusamus quasi molestias,
+              dolorem ut a eveniet omnis?
             </p>
           </div>
           <div className="grid grid-cols gap-4 mt-8">

@@ -34,12 +34,12 @@ export default function About() {
           </div>
           <div className="grid gap-8 mb-6 lg:mb-16 md:grid-cols-2">
             <div className="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
-              <a>
+              <a href="#">
                 <Image
                   className="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
-                  src="/florian.jpg"
-                  width={250}
-                  height={250}
+                  src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
+                  width={500}
+                  height={500}
                   alt="Jese Avatar"
                 />
               </a>
@@ -75,13 +75,13 @@ export default function About() {
               </div>
             </div>
             <div className="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
-              <a>
+              <a href="#">
                 <Image
                   className="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
-                  src="/adrien.jpg"
-                  width={250}
-                  height={250}
-                  alt="Jese Avatar"
+                  src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
+                  width={500}
+                  height={500}
+                  alt="Michael Avatar"
                 />
               </a>
               <div className="p-5">
@@ -118,12 +118,12 @@ export default function About() {
             </div>
             <div className="items-center bg-gray-50 rounded-lg shadow sm:flex dark:bg-gray-800 dark:border-gray-700">
               <a>
-              <Image
+                <Image
                   className="w-full rounded-lg sm:rounded-none sm:rounded-l-lg"
-                  src="/andy.jpg"
-                  width={250}
-                  height={250}
-                  alt="Jese Avatar"
+                  src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/jese-leos.png"
+                  width={500}
+                  height={500}
+                  alt="Sofia Avatar"
                 />
               </a>
               <div className="p-5">

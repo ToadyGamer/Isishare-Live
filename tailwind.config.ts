@@ -87,7 +87,6 @@ const config = {
       'black': 'var(--black)',
       'light-gray-transparent': 'var(--light-gray-transparent)',
       'light-blue-transparent': 'var(--light-blue-transparent)',
-      'red':'var(--red)',
     },
   },
   plugins: [require("tailwindcss-animate")],

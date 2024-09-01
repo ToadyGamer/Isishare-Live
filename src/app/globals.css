@@ -4,6 +4,9 @@
 
 @layer base {
 
+
+
+
 .containerForum {
     display: grid;
     grid-template-rows: 1fr 100px;
@@ -71,7 +74,11 @@
         --black: #000000;
         --light-blue-transparent: #609bf37c;
         --light-gray-transparent: #bbbbbc76;
-        --red: #ff0000;
+    }
+
+    #buttontogglePopup {
+        position: relative;
+        top: 0.5vh;
     }
 
     .dark {
@@ -131,7 +138,7 @@
     padding: 0.5rem;
     border: 1px solid #bbbbbc;
     border-radius: 4px;
-    width: 30vw;
+    width: 300px;
     outline: none;
 }
 
@@ -143,17 +150,6 @@
     opacity: 10;
 }
 
-/* Taille icon interet groups view kanban */
-.small-icon-kanban {
-    width: 25%;
-    height: auto;
-    float:right;
-  }
-  
-.small-icon-tree {
-    width: 20%;
-    height: auto;
-}
 
 .parent {
     display: grid;
@@ -171,8 +167,10 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: 1fr;
+    grid-column-gap: 10vw;
     grid-row-gap: 0px;
     width: 80vw;
+    margin-left: 5vw;
 }
     
 .div1Recom { grid-area: 1 / 1 / 2 / 2; }
@@ -196,6 +194,4 @@
 
 *{
     scroll-behavior: smooth;
-    font-family: 'Roboto', sans-serif;
 }
-
